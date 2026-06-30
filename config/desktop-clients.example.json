@@ -1,0 +1,30 @@
+{
+  "sessions": 4,
+  "minDelaySeconds": 4,
+  "maxDelaySeconds": 12,
+  "promptCategories": [
+    "genai",
+    "embedded-ai",
+    "business",
+    "software",
+    "policy",
+    "creative"
+  ],
+  "clients": [
+    {
+      "name": "Claude Desktop",
+      "enabled": true,
+      "windowTitle": "Claude"
+    },
+    {
+      "name": "ChatGPT Desktop",
+      "enabled": true,
+      "windowTitle": "ChatGPT"
+    },
+    {
+      "name": "Microsoft Copilot Desktop",
+      "enabled": false,
+      "windowTitle": "Copilot"
+    }
+  ]
+}

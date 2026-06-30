@@ -2,5 +2,6 @@ node_modules/
 downloads/
 fixtures/generated/
 config/targets.local.json
+config/desktop-clients.local.json
 *.log
 runs.jsonl

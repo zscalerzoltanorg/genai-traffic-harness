@@ -79,7 +79,7 @@ try {
 async function launchContext(browserConfig, downloadsPath) {
   const channel = browserConfig.channel || "msedge";
   const userDataDir = browserConfig.userDataDir?.trim()
-    ? path.resolve(browserConfig.userDataDir)
+    ? path.resolve(expandConfigPath(browserConfig.userDataDir))
     : path.resolve(".browser-profile");
 
   const args = [];
@@ -332,4 +332,11 @@ function randomInt(min, max) {
 
 function choice(values) {
   return values[randomInt(0, values.length - 1)];
+}
+
+function expandConfigPath(value) {
+  return value
+    .replace(/^~(?=$|[\\/])/, process.env.USERPROFILE || process.env.HOME || "~")
+    .replace(/%([^%]+)%/g, (_, name) => process.env[name] ?? `%${name}%`)
+    .replace(/\$env:([A-Za-z_][A-Za-z0-9_]*)/g, (_, name) => process.env[name] ?? `$env:${name}`);
 }

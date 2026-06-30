@@ -1,0 +1,136 @@
+{
+  "browser": {
+    "channel": "chrome",
+    "headless": false,
+    "userDataDir": "%USERPROFILE%/AppData/Local/Google/Chrome/User Data",
+    "profileDirectory": "Default",
+    "viewport": {
+      "width": 1440,
+      "height": 950
+    }
+  },
+  "run": {
+    "sessions": 8,
+    "minDelayMs": 4000,
+    "maxDelayMs": 14000,
+    "defaultTimeoutMs": 25000,
+    "downloadDir": "downloads",
+    "deleteDownloads": true,
+    "logFile": "runs.jsonl",
+    "allowUploads": true,
+    "uploadProbability": 0.3,
+    "promptCategories": [
+      "genai",
+      "embedded-ai",
+      "business",
+      "software",
+      "policy",
+      "creative"
+    ]
+  },
+  "targets": [
+    {
+      "name": "ChatGPT",
+      "enabled": true,
+      "kind": "chat",
+      "url": "https://chatgpt.com/",
+      "promptCategories": ["genai", "software", "creative", "policy"],
+      "selectors": {
+        "input": [
+          "textarea",
+          "[contenteditable='true']",
+          "[role='textbox']"
+        ],
+        "send": [
+          "button[aria-label*='Send' i]",
+          "button[data-testid*='send' i]"
+        ],
+        "attach": [
+          "button[aria-label*='Attach' i]",
+          "button[aria-label*='Upload' i]",
+          "button:has-text('Attach')"
+        ]
+      }
+    },
+    {
+      "name": "Claude Web",
+      "enabled": true,
+      "kind": "chat",
+      "url": "https://claude.ai/",
+      "promptCategories": ["genai", "business", "software", "embedded-ai"],
+      "selectors": {
+        "input": [
+          "textarea",
+          "[contenteditable='true']",
+          "[role='textbox']"
+        ],
+        "send": [
+          "button[aria-label*='Send' i]",
+          "button[type='submit']"
+        ],
+        "attach": [
+          "button[aria-label*='Attach' i]",
+          "button[aria-label*='Upload' i]",
+          "button:has-text('Attach')"
+        ]
+      }
+    },
+    {
+      "name": "Microsoft Copilot",
+      "enabled": true,
+      "kind": "chat",
+      "url": "https://copilot.microsoft.com/",
+      "promptCategories": ["genai", "business", "software"],
+      "selectors": {
+        "input": [
+          "textarea",
+          "[contenteditable='true']",
+          "[role='textbox']"
+        ],
+        "send": [
+          "button[aria-label*='Send' i]",
+          "button[type='submit']"
+        ],
+        "attach": [
+          "button[aria-label*='Attach' i]",
+          "button[aria-label*='Upload' i]"
+        ]
+      }
+    },
+    {
+      "name": "AI Product Docs Browse",
+      "enabled": true,
+      "kind": "browse",
+      "url": "https://learn.microsoft.com/en-us/azure/ai-services/",
+      "maxClicks": 2
+    },
+    {
+      "name": "NVIDIA Embedded AI Browse",
+      "enabled": true,
+      "kind": "browse",
+      "url": "https://developer.nvidia.com/embedded-computing",
+      "maxClicks": 2
+    },
+    {
+      "name": "Hugging Face Browse",
+      "enabled": true,
+      "kind": "browse",
+      "url": "https://huggingface.co/",
+      "maxClicks": 2
+    },
+    {
+      "name": "Local Fixture Download Smoke",
+      "enabled": true,
+      "kind": "download",
+      "url": "https://file-examples.com/",
+      "selectors": {
+        "downloadLinks": [
+          "a[href$='.pdf']",
+          "a[href$='.docx']",
+          "a[href$='.xlsx']",
+          "a[href$='.csv']"
+        ]
+      }
+    }
+  ]
+}
