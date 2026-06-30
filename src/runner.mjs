@@ -20,12 +20,15 @@ const promptsPath = path.resolve("config/prompts.json");
 
 const config = await readJson(configPath).catch(() => readJson(fallbackConfigPath));
 const prompts = await readJson(promptsPath);
+const targetFilters = targetFilter
+  ? targetFilter.split(",").map((item) => item.trim().toLowerCase()).filter(Boolean)
+  : [];
 
 const enabledTargets = config.targets.filter((target) => {
   if (target.enabled === false) return false;
   if (kindFilter === "chat-like" && !["chat", "isolated-chat", "embedded-chat"].includes(target.kind)) return false;
   if (kindFilter && kindFilter !== "chat-like" && target.kind !== kindFilter) return false;
-  if (targetFilter && !target.name.toLowerCase().includes(targetFilter.toLowerCase())) return false;
+  if (targetFilters.length > 0 && !targetFilters.some((filter) => target.name.toLowerCase().includes(filter))) return false;
   return true;
 });
 if (enabledTargets.length === 0) {
@@ -272,15 +275,34 @@ async function isolatedChat(page, target) {
 
 async function sendChatPrompt(page, target, prompt) {
   await dismissOverlays(page);
-  const input = await findFirstVisible(page, target.selectors?.input ?? defaultInputSelectors());
-  await typeIntoInput(input, prompt);
+  try {
+    const input = await findFirstVisible(page, target.selectors?.input ?? defaultInputSelectors());
+    await typeIntoInput(input, prompt);
 
-  const sentByButton = await clickFirstAvailable(page, target.selectors?.send ?? []);
-  if (!sentByButton) {
-    await input.press(process.platform === "darwin" ? "Meta+Enter" : "Control+Enter").catch(async () => {
-      await input.press("Enter");
-    });
+    const sentByButton = await clickFirstAvailable(page, target.selectors?.send ?? []);
+    if (!sentByButton) {
+      await input.press(process.platform === "darwin" ? "Meta+Enter" : "Control+Enter").catch(async () => {
+        await input.press("Enter");
+      });
+    }
+  } catch (error) {
+    if (!target.keyboardFallback?.enabled) throw error;
+    await sendPromptWithKeyboardFallback(page, target, prompt);
   }
+}
+
+async function sendPromptWithKeyboardFallback(page, target, prompt) {
+  const viewport = page.viewportSize() ?? { width: 1440, height: 950 };
+  const clickPoint = target.keyboardFallback?.inputClick ?? { xRatio: 0.5, yRatio: 0.85 };
+
+  await page.mouse.click(
+    Math.round(viewport.width * clickPoint.xRatio),
+    Math.round(viewport.height * clickPoint.yRatio)
+  );
+  await humanPause(500, 1200);
+  await page.keyboard.type(prompt.text, { delay: randomInt(8, 35) });
+  await humanPause(300, 900);
+  await page.keyboard.press("Enter");
 }
 
 async function dismissOverlays(page) {

@@ -76,6 +76,12 @@ For prompt-heavy testing that focuses on real chat apps:
 npm run run:prompts
 ```
 
+For prompt-heavy testing biased toward the chat apps that have been most reliable in practice:
+
+```powershell
+npm run run:stable-prompts
+```
+
 To touch each normal chat target once:
 
 ```powershell

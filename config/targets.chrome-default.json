@@ -35,6 +35,7 @@
       "name": "ChatGPT",
       "enabled": true,
       "kind": "chat",
+      "weight": 8,
       "url": "https://chatgpt.com/",
       "uploadProbability": 0.28,
       "conversation": {
@@ -56,6 +57,7 @@
       "name": "Claude Web",
       "enabled": true,
       "kind": "chat",
+      "weight": 7,
       "url": "https://claude.ai/",
       "uploadProbability": 0.28,
       "conversation": {
@@ -76,6 +78,7 @@
       "name": "Perplexity",
       "enabled": true,
       "kind": "chat",
+      "weight": 8,
       "url": "https://www.perplexity.ai/",
       "uploadProbability": 0.2,
       "conversation": {
@@ -120,6 +123,7 @@
       "name": "Google Gemini",
       "enabled": true,
       "kind": "chat",
+      "weight": 5,
       "url": "https://gemini.google.com/app",
       "uploadProbability": 0.18,
       "conversation": {
@@ -140,6 +144,7 @@
       "name": "Poe",
       "enabled": true,
       "kind": "chat",
+      "weight": 6,
       "url": "https://poe.com/",
       "uploadProbability": 0.15,
       "promptCategories": ["genai", "creative", "business"],
@@ -157,6 +162,7 @@
       "name": "You.com",
       "enabled": true,
       "kind": "chat",
+      "weight": 6,
       "url": "https://you.com/",
       "uploadProbability": 0.15,
       "promptCategories": ["genai", "business", "software"],
@@ -174,6 +180,7 @@
       "name": "Mistral Le Chat",
       "enabled": true,
       "kind": "chat",
+      "weight": 3,
       "url": "https://chat.mistral.ai/chat",
       "uploadProbability": 0.15,
       "promptCategories": ["genai", "software", "business"],
@@ -190,6 +197,7 @@
       "name": "HuggingChat",
       "enabled": true,
       "kind": "chat",
+      "weight": 1,
       "url": "https://huggingface.co/chat/",
       "uploadProbability": 0.12,
       "promptCategories": ["genai", "software", "embedded-ai"],
@@ -206,9 +214,17 @@
       "name": "Meta AI",
       "enabled": true,
       "kind": "chat",
+      "weight": 1,
       "url": "https://www.meta.ai/",
       "uploadProbability": 0.12,
       "promptCategories": ["genai", "creative", "business"],
+      "keyboardFallback": {
+        "enabled": true,
+        "inputClick": {
+          "xRatio": 0.5,
+          "yRatio": 0.82
+        }
+      },
       "auth": {
         "googleSelectors": ["button:has-text('Continue with Google')", "text=/continue with google/i"]
       },
