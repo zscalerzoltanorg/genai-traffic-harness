@@ -18,7 +18,9 @@
     "deleteDownloads": true,
     "logFile": "runs.jsonl",
     "allowUploads": true,
-    "uploadProbability": 0.25,
+    "uploadProbability": 0.12,
+    "multiTurnProbability": 0.4,
+    "maxChatTurns": 3,
     "promptCategories": [
       "genai",
       "embedded-ai",
@@ -34,7 +36,11 @@
       "enabled": true,
       "kind": "chat",
       "url": "https://chatgpt.com/",
-      "uploadProbability": 0.6,
+      "uploadProbability": 0.28,
+      "conversation": {
+        "multiTurnProbability": 0.5,
+        "maxTurns": 3
+      },
       "promptCategories": ["genai", "software", "creative", "policy"],
       "auth": {
         "googleSelectors": ["button:has-text('Continue with Google')", "text=/continue with google/i"],
@@ -51,7 +57,11 @@
       "enabled": true,
       "kind": "chat",
       "url": "https://claude.ai/",
-      "uploadProbability": 0.6,
+      "uploadProbability": 0.28,
+      "conversation": {
+        "multiTurnProbability": 0.5,
+        "maxTurns": 3
+      },
       "promptCategories": ["genai", "business", "software", "embedded-ai"],
       "auth": {
         "googleSelectors": ["button:has-text('Continue with Google')", "text=/continue with google/i"]
@@ -67,7 +77,11 @@
       "enabled": true,
       "kind": "chat",
       "url": "https://www.perplexity.ai/",
-      "uploadProbability": 0.45,
+      "uploadProbability": 0.2,
+      "conversation": {
+        "multiTurnProbability": 0.35,
+        "maxTurns": 2
+      },
       "promptCategories": ["genai", "business", "software", "policy"],
       "auth": {
         "googleSelectors": ["button:has-text('Continue with Google')", "text=/continue with google/i"],
@@ -107,7 +121,11 @@
       "enabled": true,
       "kind": "chat",
       "url": "https://gemini.google.com/app",
-      "uploadProbability": 0.45,
+      "uploadProbability": 0.18,
+      "conversation": {
+        "multiTurnProbability": 0.4,
+        "maxTurns": 3
+      },
       "promptCategories": ["genai", "business", "creative", "policy"],
       "auth": {
         "googleSelectors": ["button:has-text('Sign in')", "a:has-text('Sign in')", "text=/sign in/i"]
@@ -123,7 +141,7 @@
       "enabled": true,
       "kind": "chat",
       "url": "https://poe.com/",
-      "uploadProbability": 0.35,
+      "uploadProbability": 0.15,
       "promptCategories": ["genai", "creative", "business"],
       "auth": {
         "googleSelectors": ["button:has-text('Continue with Google')", "text=/continue with google/i"],
@@ -140,7 +158,7 @@
       "enabled": true,
       "kind": "chat",
       "url": "https://you.com/",
-      "uploadProbability": 0.35,
+      "uploadProbability": 0.15,
       "promptCategories": ["genai", "business", "software"],
       "auth": {
         "googleSelectors": ["button:has-text('Continue with Google')", "text=/continue with google/i"],
@@ -157,7 +175,7 @@
       "enabled": true,
       "kind": "chat",
       "url": "https://chat.mistral.ai/chat",
-      "uploadProbability": 0.35,
+      "uploadProbability": 0.15,
       "promptCategories": ["genai", "software", "business"],
       "auth": {
         "googleSelectors": ["button:has-text('Continue with Google')", "text=/continue with google/i"]
@@ -173,7 +191,7 @@
       "enabled": true,
       "kind": "chat",
       "url": "https://huggingface.co/chat/",
-      "uploadProbability": 0.3,
+      "uploadProbability": 0.12,
       "promptCategories": ["genai", "software", "embedded-ai"],
       "auth": {
         "googleSelectors": ["button:has-text('Continue with Google')", "text=/continue with google/i"]
@@ -189,7 +207,7 @@
       "enabled": true,
       "kind": "chat",
       "url": "https://www.meta.ai/",
-      "uploadProbability": 0.25,
+      "uploadProbability": 0.12,
       "promptCategories": ["genai", "creative", "business"],
       "auth": {
         "googleSelectors": ["button:has-text('Continue with Google')", "text=/continue with google/i"]

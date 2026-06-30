@@ -38,6 +38,8 @@ const runConfig = {
   deleteDownloads: true,
   allowUploads: false,
   uploadProbability: 0.2,
+  multiTurnProbability: 0.35,
+  maxChatTurns: 3,
   promptCategories: Object.keys(prompts),
   logFile: "runs.jsonl",
   ...(config.run ?? {})
@@ -200,21 +202,22 @@ async function chat(page, target) {
     }
   }
 
-  const prompt = buildPrompt(target);
+  const turns = chooseChatTurnCount(target);
+  const firstPrompt = buildPrompt(target);
   const uploaded = await maybeUpload(page, target);
+  const promptCategories = [firstPrompt.category];
 
-  const input = await findFirstVisible(page, target.selectors?.input ?? defaultInputSelectors());
-  await typeIntoInput(input, prompt);
+  await sendChatPrompt(page, target, firstPrompt);
+  await humanPause(5000, 14000);
 
-  const sentByButton = await clickFirstAvailable(page, target.selectors?.send ?? []);
-  if (!sentByButton) {
-    await input.press(process.platform === "darwin" ? "Meta+Enter" : "Control+Enter").catch(async () => {
-      await input.press("Enter");
-    });
+  for (let turn = 2; turn <= turns; turn += 1) {
+    const followUp = buildFollowUpPrompt(firstPrompt.category, turn);
+    promptCategories.push(followUp.category);
+    await sendChatPrompt(page, target, followUp);
+    await humanPause(6000, 18000);
   }
 
-  await humanPause(4000, 12000);
-  return { promptCategory: prompt.category, uploaded };
+  return { promptCategories, turns, uploaded };
 }
 
 async function isolatedChat(page, target) {
@@ -239,6 +242,18 @@ async function isolatedChat(page, target) {
     isolated: true,
     uploaded: false
   };
+}
+
+async function sendChatPrompt(page, target, prompt) {
+  const input = await findFirstVisible(page, target.selectors?.input ?? defaultInputSelectors());
+  await typeIntoInput(input, prompt);
+
+  const sentByButton = await clickFirstAvailable(page, target.selectors?.send ?? []);
+  if (!sentByButton) {
+    await input.press(process.platform === "darwin" ? "Meta+Enter" : "Control+Enter").catch(async () => {
+      await input.press("Enter");
+    });
+  }
 }
 
 async function detectAccessGate(page) {
@@ -452,6 +467,59 @@ function buildPrompt(target) {
   };
 }
 
+function buildFollowUpPrompt(category, turn) {
+  const followUps = {
+    genai: [
+      "Can you compare that with a second approach?",
+      "What would make this safer for an enterprise rollout?",
+      "Give me a short example I could use in a meeting."
+    ],
+    "embedded-ai": [
+      "What would change if this had to run offline?",
+      "What hardware constraints matter most here?",
+      "Summarize the deployment risks in plain English."
+    ],
+    business: [
+      "Turn that into a concise executive summary.",
+      "What objections might a buyer raise?",
+      "Give me three practical next steps."
+    ],
+    software: [
+      "What edge cases should I test?",
+      "Can you turn that into implementation steps?",
+      "What logs or metrics would help debug this?"
+    ],
+    policy: [
+      "Make that more concise and policy-friendly.",
+      "What should be explicitly prohibited?",
+      "Add a short exception-handling section."
+    ],
+    creative: [
+      "Give me a few more options with a different tone.",
+      "Make it shorter and more direct.",
+      "Which option is strongest and why?"
+    ]
+  };
+
+  const options = followUps[category] ?? [
+    "Can you elaborate with a practical example?",
+    "Summarize that in a shorter form.",
+    "What should I consider next?"
+  ];
+
+  return {
+    category,
+    text: `${choice(options)}\n\nKeep this as follow-up ${turn} in the same conversation.`
+  };
+}
+
+function chooseChatTurnCount(target) {
+  const maxTurns = Math.max(1, target.conversation?.maxTurns ?? runConfig.maxChatTurns ?? 1);
+  const multiTurnProbability = target.conversation?.multiTurnProbability ?? runConfig.multiTurnProbability ?? 0;
+  if (maxTurns <= 1 || Math.random() > multiTurnProbability) return 1;
+  return randomInt(2, maxTurns);
+}
+
 async function typeIntoInput(locator, prompt) {
   await locator.click();
   await locator.fill(prompt.text).catch(async () => {
@@ -513,9 +581,9 @@ async function cleanupDownloads(dir, enabled) {
 }
 
 function previewAction(target) {
-  if (target.kind === "chat" || target.kind === "embedded-chat") {
+  if (target.kind === "chat" || target.kind === "embedded-chat" || target.kind === "isolated-chat") {
     const prompt = buildPrompt(target);
-    return { promptCategory: prompt.category, prompt: prompt.text };
+    return { promptCategory: prompt.category, prompt: prompt.text, possibleTurns: chooseChatTurnCount(target) };
   }
   return { url: target.url };
 }

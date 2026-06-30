@@ -110,7 +110,7 @@ The task runs `scripts\run-once.ps1`, which calls `npm run run`.
 
 `npm run run` runs browser automation only. With the Chrome default config, it randomly chooses among enabled chat, browse, and download targets.
 
-The chat-style default targets are ChatGPT, Claude Web, Perplexity, DeepSeek, Google Gemini, Poe, You.com, Mistral Le Chat, HuggingChat, and Meta AI. Chat targets have higher upload probabilities than browse targets so file inspection gets regular exercise when the app exposes a normal file picker.
+The chat-style default targets are ChatGPT, Claude Web, Perplexity, DeepSeek, Google Gemini, Poe, You.com, Mistral Le Chat, HuggingChat, and Meta AI. Chat sessions are intentionally varied: most are one prompt, some become short 2-3 turn conversations, and file upload is decided once per session. When an upload happens, it is attached only before the first prompt so later follow-ups look like a normal conversation.
 
 Some chat apps require accounts. The scalable approach is to manually authenticate only the few chat apps where you need real prompt and file-upload coverage. For everything else, the runner will attempt guest entry points such as "Try it first" when configured, or log `authRequired` and move on.
 
@@ -121,6 +121,16 @@ The browse-style default targets include OpenAI Platform, Anthropic Docs, Azure 
 `scripts\run-desktop-clients.ps1` runs desktop app automation only. By default it sends prompts to open Claude Desktop and ChatGPT Desktop windows. Codex is present as a disabled optional entry in `config\desktop-clients.local.json`; enable it only if you have a visible Codex app/window where pasted prompts make sense.
 
 `npm run run:all` runs `npm run run` first, then runs `scripts\run-desktop-clients.ps1`. It still exits when the configured browser and desktop sessions finish. If browser automation fails to launch, `run:all` warns and still tries desktop automation.
+
+Upload and conversation behavior can be tuned in `config\targets.local.json`:
+
+```json
+"uploadProbability": 0.28,
+"conversation": {
+  "multiTurnProbability": 0.5,
+  "maxTurns": 3
+}
+```
 
 The scheduled task created by `scripts\register-scheduled-task.ps1` runs browser automation only. If you also want thick-client activity on a schedule, create a separate scheduled task for `scripts\run-desktop-clients.ps1`.
 
