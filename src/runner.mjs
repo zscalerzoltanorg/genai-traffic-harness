@@ -62,10 +62,20 @@ if (fastMode) {
 
 const plannedTargets = allTargetsMode
   ? shuffle(enabledTargets).slice(0, sessionOverride ? runConfig.sessions : enabledTargets.length)
-  : Array.from({ length: runConfig.sessions }, () => choice(enabledTargets));
+  : Array.from({ length: runConfig.sessions }, () => chooseWeightedTarget(enabledTargets));
 
 const downloadDir = path.resolve(runConfig.downloadDir);
 await mkdir(downloadDir, { recursive: true });
+
+const summary = {
+  ok: 0,
+  failed: 0,
+  byKind: {},
+  prompts: 0,
+  uploads: 0,
+  authRequired: 0,
+  gated: 0
+};
 
 const context = dryRun ? null : await launchContext(config.browser ?? {}, downloadDir);
 
@@ -89,10 +99,12 @@ try {
         event.action = await runTarget(context, target);
       }
       event.ok = true;
+      updateSummary(summary, event);
     } catch (error) {
       event.ok = false;
       event.error = error.message;
       console.warn(`Target failed: ${target.name}: ${error.message}`);
+      updateSummary(summary, event);
     }
 
     await appendJsonLine(runConfig.logFile, event);
@@ -106,6 +118,7 @@ try {
   if (context) {
     await context.close();
   }
+  printSummary(summary);
 }
 
 async function launchContext(browserConfig, downloadsPath) {
@@ -137,6 +150,7 @@ async function runTarget(context, target) {
   try {
     await page.goto(target.url, { waitUntil: "domcontentloaded" });
     await humanPause();
+    await dismissOverlays(page);
 
     if (target.kind === "browse") {
       return await browse(page, target);
@@ -257,6 +271,7 @@ async function isolatedChat(page, target) {
 }
 
 async function sendChatPrompt(page, target, prompt) {
+  await dismissOverlays(page);
   const input = await findFirstVisible(page, target.selectors?.input ?? defaultInputSelectors());
   await typeIntoInput(input, prompt);
 
@@ -265,6 +280,31 @@ async function sendChatPrompt(page, target, prompt) {
     await input.press(process.platform === "darwin" ? "Meta+Enter" : "Control+Enter").catch(async () => {
       await input.press("Enter");
     });
+  }
+}
+
+async function dismissOverlays(page) {
+  await page.keyboard.press("Escape").catch(() => {});
+
+  const selectors = [
+    "button[aria-label*='close' i]",
+    "button[title*='close' i]",
+    "[role='button'][aria-label*='close' i]",
+    "button:has-text('Accept all')",
+    "button:has-text('Accept')",
+    "button:has-text('I agree')",
+    "button:has-text('Got it')",
+    "button:has-text('Maybe later')",
+    "button:has-text('Not now')",
+    "button:has-text('Skip')"
+  ];
+
+  for (const selector of selectors) {
+    const locator = page.locator(selector).first();
+    if ((await locator.count().catch(() => 0)) === 0) continue;
+    if (!(await locator.isVisible().catch(() => false))) continue;
+    await locator.click({ timeout: 1500 }).catch(() => {});
+    await humanPause(300, 900);
   }
 }
 
@@ -533,7 +573,9 @@ function chooseChatTurnCount(target) {
 }
 
 async function typeIntoInput(locator, prompt) {
-  await locator.click();
+  await locator.click({ timeout: 5000 }).catch(async () => {
+    await locator.focus();
+  });
   await locator.fill(prompt.text).catch(async () => {
     await locator.evaluate((node, value) => {
       if ("value" in node) {
@@ -628,6 +670,29 @@ function choice(values) {
   return values[randomInt(0, values.length - 1)];
 }
 
+function chooseWeightedTarget(targets) {
+  const weighted = targets.map((target) => ({
+    target,
+    weight: Math.max(1, target.weight ?? defaultTargetWeight(target))
+  }));
+  const total = weighted.reduce((sum, item) => sum + item.weight, 0);
+  let pick = Math.random() * total;
+
+  for (const item of weighted) {
+    pick -= item.weight;
+    if (pick <= 0) return item.target;
+  }
+
+  return weighted.at(-1).target;
+}
+
+function defaultTargetWeight(target) {
+  if (target.kind === "chat" || target.kind === "embedded-chat") return 5;
+  if (target.kind === "isolated-chat") return 2;
+  if (target.kind === "download") return 1;
+  return 1;
+}
+
 function shuffle(values) {
   const copy = [...values];
   for (let i = copy.length - 1; i > 0; i -= 1) {
@@ -648,4 +713,28 @@ function getArgValue(name) {
   const prefix = `${name}=`;
   const match = process.argv.slice(2).find((arg) => arg.startsWith(prefix));
   return match ? match.slice(prefix.length) : "";
+}
+
+function updateSummary(stats, event) {
+  if (event.ok) stats.ok += 1;
+  else stats.failed += 1;
+
+  stats.byKind[event.kind] = (stats.byKind[event.kind] ?? 0) + 1;
+
+  const action = event.action ?? {};
+  if (action.authRequired) stats.authRequired += 1;
+  if (action.gated) stats.gated += 1;
+  if (action.uploaded) stats.uploads += 1;
+  if (Array.isArray(action.promptCategories)) stats.prompts += action.promptCategories.length;
+  else if (action.promptCategory) stats.prompts += 1;
+}
+
+function printSummary(stats) {
+  const kinds = Object.entries(stats.byKind)
+    .map(([kind, count]) => `${kind}:${count}`)
+    .join(", ");
+
+  console.log("");
+  console.log(`Summary: ok=${stats.ok} failed=${stats.failed} prompts=${stats.prompts} uploads=${stats.uploads} authRequired=${stats.authRequired} gated=${stats.gated}`);
+  if (kinds) console.log(`By kind: ${kinds}`);
 }

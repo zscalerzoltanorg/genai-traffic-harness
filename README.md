@@ -70,6 +70,18 @@ For faster testing with shorter waits:
 npm run run:quick
 ```
 
+For prompt-heavy testing that focuses on real chat apps:
+
+```powershell
+npm run run:prompts
+```
+
+To touch each normal chat target once:
+
+```powershell
+npm run run:prompt-targets
+```
+
 To touch every enabled target once, shuffled, with shorter waits:
 
 ```powershell
@@ -130,6 +142,8 @@ The task runs `scripts\run-once.ps1`, which calls `npm run run`.
 `npm run run` runs browser automation only. With the Chrome default config, it randomly chooses among enabled chat, browse, and download targets.
 
 Plain `npm run run` does not visit every configured target. It runs the configured number of random sessions. Use `npm run run:all-targets` when you want one pass across every enabled target.
+
+Random runs are weighted toward real chat targets, so prompt-bearing traffic should appear more often than simple browsing. For the highest prompt volume, use `npm run run:prompts`.
 
 The chat-style default targets are ChatGPT, Claude Web, Perplexity, DeepSeek, Google Gemini, Poe, You.com, Mistral Le Chat, HuggingChat, and Meta AI. Chat sessions are intentionally varied: most are one prompt, some become short 2-3 turn conversations, and file upload is decided once per session. When an upload happens, it is attached only before the first prompt so later follow-ups look like a normal conversation.
 
