@@ -81,6 +81,9 @@ const summary = {
 };
 
 const context = dryRun ? null : await launchContext(config.browser ?? {}, downloadDir);
+if (context) {
+  await closeInitialBlankPages(context);
+}
 
 try {
   for (let session = 0; session < plannedTargets.length; session += 1) {
@@ -138,12 +141,21 @@ async function launchContext(browserConfig, downloadsPath) {
   return chromium.launchPersistentContext(userDataDir, {
     channel,
     headless: browserConfig.headless ?? false,
+    chromiumSandbox: browserConfig.chromiumSandbox ?? true,
     acceptDownloads: true,
     downloadsPath,
     viewport: browserConfig.viewport ?? { width: 1440, height: 950 },
     timeout: runConfig.defaultTimeoutMs,
-    args
+    args: ["--test-type", ...args]
   });
+}
+
+async function closeInitialBlankPages(context) {
+  for (const page of context.pages()) {
+    if (page.url() === "about:blank") {
+      await page.close().catch(() => {});
+    }
+  }
 }
 
 async function runTarget(context, target) {

@@ -2,6 +2,7 @@
   "browser": {
     "channel": "chrome",
     "headless": false,
+    "chromiumSandbox": true,
     "userDataDir": "%USERPROFILE%/.genai-traffic-harness/chrome-profile",
     "profileDirectory": "",
     "viewport": {
