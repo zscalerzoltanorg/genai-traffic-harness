@@ -37,6 +37,7 @@
       "uploadProbability": 0.6,
       "promptCategories": ["genai", "software", "creative", "policy"],
       "auth": {
+        "googleSelectors": ["button:has-text('Continue with Google')", "text=/continue with google/i"],
         "guestSelectors": ["text=/try it first/i", "a:has-text('Try it first')", "button:has-text('Try it first')"]
       },
       "selectors": {
@@ -52,6 +53,9 @@
       "url": "https://claude.ai/",
       "uploadProbability": 0.6,
       "promptCategories": ["genai", "business", "software", "embedded-ai"],
+      "auth": {
+        "googleSelectors": ["button:has-text('Continue with Google')", "text=/continue with google/i"]
+      },
       "selectors": {
         "input": ["textarea", "[contenteditable='true']", "[role='textbox']"],
         "send": ["button[aria-label*='Send' i]", "button[type='submit']"],
@@ -66,6 +70,7 @@
       "uploadProbability": 0.45,
       "promptCategories": ["genai", "business", "software", "policy"],
       "auth": {
+        "googleSelectors": ["button:has-text('Continue with Google')", "text=/continue with google/i"],
         "guestSelectors": ["text=/continue as guest/i", "text=/try without/i", "button:has-text('Continue as guest')"]
       },
       "selectors": {
@@ -81,6 +86,9 @@
       "url": "https://chat.deepseek.com/",
       "uploadProbability": 0.45,
       "promptCategories": ["genai", "software", "business"],
+      "auth": {
+        "googleSelectors": ["button:has-text('Continue with Google')", "text=/continue with google/i"]
+      },
       "selectors": {
         "input": ["textarea", "[contenteditable='true']", "[role='textbox']"],
         "send": ["button[aria-label*='Send' i]", "button[type='submit']"],
@@ -94,6 +102,9 @@
       "url": "https://gemini.google.com/app",
       "uploadProbability": 0.45,
       "promptCategories": ["genai", "business", "creative", "policy"],
+      "auth": {
+        "googleSelectors": ["button:has-text('Sign in')", "a:has-text('Sign in')", "text=/sign in/i"]
+      },
       "selectors": {
         "input": ["textarea", "[contenteditable='true']", "[role='textbox']"],
         "send": ["button[aria-label*='Send' i]", "button[type='submit']"],
@@ -108,6 +119,7 @@
       "uploadProbability": 0.35,
       "promptCategories": ["genai", "creative", "business"],
       "auth": {
+        "googleSelectors": ["button:has-text('Continue with Google')", "text=/continue with google/i"],
         "guestSelectors": ["text=/continue as guest/i", "text=/try without/i", "button:has-text('Continue as guest')"]
       },
       "selectors": {
@@ -124,6 +136,7 @@
       "uploadProbability": 0.35,
       "promptCategories": ["genai", "business", "software"],
       "auth": {
+        "googleSelectors": ["button:has-text('Continue with Google')", "text=/continue with google/i"],
         "guestSelectors": ["text=/continue as guest/i", "text=/try without/i", "button:has-text('Continue as guest')"]
       },
       "selectors": {
@@ -139,6 +152,9 @@
       "url": "https://chat.mistral.ai/chat",
       "uploadProbability": 0.35,
       "promptCategories": ["genai", "software", "business"],
+      "auth": {
+        "googleSelectors": ["button:has-text('Continue with Google')", "text=/continue with google/i"]
+      },
       "selectors": {
         "input": ["textarea", "[contenteditable='true']", "[role='textbox']"],
         "send": ["button[aria-label*='Send' i]", "button[type='submit']"],
@@ -152,6 +168,9 @@
       "url": "https://huggingface.co/chat/",
       "uploadProbability": 0.3,
       "promptCategories": ["genai", "software", "embedded-ai"],
+      "auth": {
+        "googleSelectors": ["button:has-text('Continue with Google')", "text=/continue with google/i"]
+      },
       "selectors": {
         "input": ["textarea", "[contenteditable='true']", "[role='textbox']"],
         "send": ["button[aria-label*='Send' i]", "button[type='submit']"],
@@ -165,6 +184,9 @@
       "url": "https://www.meta.ai/",
       "uploadProbability": 0.25,
       "promptCategories": ["genai", "creative", "business"],
+      "auth": {
+        "googleSelectors": ["button:has-text('Continue with Google')", "text=/continue with google/i"]
+      },
       "selectors": {
         "input": ["textarea", "[contenteditable='true']", "[role='textbox']"],
         "send": ["button[aria-label*='Send' i]", "button[type='submit']"],

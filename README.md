@@ -23,7 +23,16 @@ Config-driven browser automation for generating low-rate, auditable GenAI and em
    npm run fixtures
    ```
 
-3. Optional: open the automation Chrome profile and log into the AI apps you most care about:
+3. Optional but recommended: seed the automation profile from your existing Chrome login state:
+
+   ```powershell
+   taskkill /IM chrome.exe /F
+   npm run clone:chrome
+   ```
+
+   This copies your current Chrome `Default` profile into the dedicated automation profile. It only works reliably on the same Windows user, with Chrome fully closed, and some sites may still ask for MFA or fresh consent.
+
+4. Optional fallback: open the automation Chrome profile and log into the AI apps you most care about:
 
    ```powershell
    npm run login:chrome
@@ -31,14 +40,14 @@ Config-driven browser automation for generating low-rate, auditable GenAI and em
 
    This opens Google Accounts plus the main chat apps in the dedicated automation profile. Sign into Google first, then visit only the app tabs you care about and use their normal "Continue with Google" flow once. You do not need to authenticate every target; unauthenticated chat apps are skipped or tried in guest mode where available, and the broad browse catalog still creates usage. Close that Chrome window after logging in. The automation profile is separate from your regular Chrome profile because recent Chrome builds block Playwright remote debugging against the real default profile.
 
-4. Run a quick dry run, then run browser automation:
+5. Run a quick dry run, then run browser automation:
 
    ```powershell
    npm run run:dry
    npm run run
    ```
 
-5. To run browser automation and desktop app automation in one pass:
+6. To run browser automation and desktop app automation in one pass:
 
    ```powershell
    npm run run:all
@@ -89,6 +98,8 @@ The chat-style default targets are ChatGPT, Claude Web, Perplexity, DeepSeek, Go
 
 Some chat apps require accounts. The scalable approach is to manually authenticate only the few chat apps where you need real prompt and file-upload coverage. For everything else, the runner will attempt guest entry points such as "Try it first" when configured, or log `authRequired` and move on.
 
+For chat apps with a visible "Continue with Google" button, the runner can try that button when `auth.googleSelectors` is configured. If a Google account picker appears, it clicks the first visible account by default. To prefer a specific account without committing it to Git, add `"googleAccount": "you@example.com"` under that target's local `auth` object in `config\targets.local.json`.
+
 The browse-style default targets include OpenAI Platform, Anthropic Docs, Azure AI, NVIDIA Embedded AI, Hugging Face, GitHub Copilot, Cursor, Windsurf, Replit AI, Sourcegraph Cody, Tabnine, Salesforce AI, HubSpot AI, Zendesk AI, Intercom Fin, ServiceNow AI Agents, Notion AI, Canva Magic Studio, Grammarly AI, Atlassian Rovo, Slack AI, Zoom AI Companion, Figma AI, Adobe Firefly, Runway, Midjourney, Ideogram, ElevenLabs, Jasper, Copy.ai, Gamma, Synthesia, NotebookLM, and GroqCloud.
 
 `scripts\run-desktop-clients.ps1` runs desktop app automation only. By default it sends prompts to open Claude Desktop and ChatGPT Desktop windows. Codex is present as a disabled optional entry in `config\desktop-clients.local.json`; enable it only if you have a visible Codex app/window where pasted prompts make sense.
@@ -101,7 +112,7 @@ The scheduled task created by `scripts\register-scheduled-task.ps1` runs browser
 
 Visible browser and desktop automation is most reliable while the Windows desktop session is active and unlocked. If you disconnect from RDP, Windows may leave the session running, but GUI automation can become flaky, especially for `SendKeys`-based desktop clients. For unattended runs, prefer browser automation and test your exact RDP/session behavior before relying on it.
 
-The harness does not bypass CAPTCHA, "are you a robot" checks, sign-in flows, MFA, paywalls, or access-control prompts. If a page asks for login, either authenticate it once using `npm run login:chrome`, let the runner skip it, or disable that target. During normal runs, chat targets that still show login screens are logged as `authRequired` in `runs.jsonl` instead of receiving prompts. If a guest path is configured, the runner tries that first.
+The harness does not bypass CAPTCHA, "are you a robot" checks, MFA, paywalls, or access-control prompts. It can try ordinary "Continue with Google" buttons when configured, but any fresh consent, MFA, CAPTCHA, or blocked access still needs manual handling. If a page asks for login, either clone your existing Chrome profile with `npm run clone:chrome`, authenticate it once using `npm run login:chrome`, let the runner skip it, or disable that target. During normal runs, chat targets that still show login screens are logged as `authRequired` in `runs.jsonl` instead of receiving prompts. If a guest path is configured, the runner tries that too.
 
 ## Target Types
 

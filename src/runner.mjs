@@ -166,6 +166,11 @@ async function browse(page, target) {
 async function chat(page, target) {
   const authState = await detectAuthRequired(page);
   if (authState.authRequired) {
+    const googleAccess = await tryGoogleAuth(page, target);
+    if (googleAccess) {
+      return await chat(page, target);
+    }
+
     const guestAccess = await tryGuestAccess(page, target);
     if (!guestAccess) {
       return authState;
@@ -187,6 +192,45 @@ async function chat(page, target) {
 
   await humanPause(4000, 12000);
   return { promptCategory: prompt.category, uploaded };
+}
+
+async function tryGoogleAuth(page, target) {
+  const selectors = target.auth?.googleSelectors ?? [];
+  if (selectors.length === 0) return false;
+
+  for (const selector of selectors) {
+    const locator = page.locator(selector).first();
+    if ((await locator.count().catch(() => 0)) === 0) continue;
+    if (!(await locator.isVisible().catch(() => false))) continue;
+
+    await locator.click({ timeout: 5000 }).catch(() => {});
+    await page.waitForLoadState("domcontentloaded", { timeout: 15000 }).catch(() => {});
+    await humanPause();
+    await clickLikelyGoogleAccount(page, target.auth?.googleAccount);
+    await page.waitForLoadState("domcontentloaded", { timeout: 15000 }).catch(() => {});
+    await humanPause();
+
+    const authState = await detectAuthRequired(page);
+    return !authState.authRequired;
+  }
+
+  return false;
+}
+
+async function clickLikelyGoogleAccount(page, accountHint) {
+  const candidates = accountHint
+    ? [`text=${accountHint}`, `div:has-text('${accountHint}')`, `li:has-text('${accountHint}')`]
+    : ["[data-identifier]", "[role='link']:has-text('@')", "li:has-text('@')", "div:has-text('@gmail.com')"];
+
+  for (const selector of candidates) {
+    const locator = page.locator(selector).first();
+    if ((await locator.count().catch(() => 0)) === 0) continue;
+    if (!(await locator.isVisible().catch(() => false))) continue;
+    await locator.click({ timeout: 5000 }).catch(() => {});
+    return true;
+  }
+
+  return false;
 }
 
 async function tryGuestAccess(page, target) {
