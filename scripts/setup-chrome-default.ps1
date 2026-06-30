@@ -15,7 +15,7 @@ if ((Test-Path $targetsDest) -and -not $Force) {
   Write-Host "Keeping existing $targetsDest. Use -Force to overwrite it."
 } else {
   Copy-Item $targetsSource $targetsDest -Force
-  Write-Host "Wrote $targetsDest from Chrome logged-in default."
+  Write-Host "Wrote $targetsDest from Chrome automation profile default."
 }
 
 if ((Test-Path $desktopDest) -and -not $Force) {
@@ -28,6 +28,7 @@ if ((Test-Path $desktopDest) -and -not $Force) {
 Write-Host ""
 Write-Host "Next:"
 Write-Host "  npm run fixtures"
+Write-Host "  npm run login:chrome"
 Write-Host "  npm run run:dry"
 Write-Host "  npm run run"
 Write-Host "  npm run run:all"

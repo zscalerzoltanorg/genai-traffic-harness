@@ -4,7 +4,7 @@ Config-driven browser automation for generating low-rate, auditable GenAI and em
 
 ## What It Does
 
-- Opens Chrome or Edge with an optional existing user profile so SSO/browser login state can be reused.
+- Opens Chrome or Edge with a dedicated automation profile so browser login state can be reused safely.
 - Randomly visits GenAI and embedded-AI SaaS targets from `config/targets.local.json`.
 - Sends varied chat prompts where a target exposes an editable textbox.
 - Optionally uploads synthetic fixture files through normal browser file chooser flows.
@@ -23,8 +23,15 @@ Config-driven browser automation for generating low-rate, auditable GenAI and em
    npm run fixtures
    ```
 
-3. Close Chrome if it is already open. The default config reuses your logged-in Chrome profile.
-4. Run the browser automation:
+3. Open the automation Chrome profile and log into the AI apps you want to test:
+
+   ```powershell
+   npm run login:chrome
+   ```
+
+   Close that Chrome window after logging in. The automation profile is separate from your regular Chrome profile because recent Chrome builds block Playwright remote debugging against the real default profile.
+
+4. Run a quick dry run, then run browser automation:
 
    ```powershell
    npm run run:dry
@@ -41,8 +48,8 @@ Config-driven browser automation for generating low-rate, auditable GenAI and em
 
 ```json
 "channel": "chrome",
-"userDataDir": "%USERPROFILE%/AppData/Local/Google/Chrome/User Data",
-"profileDirectory": "Default"
+"userDataDir": "%USERPROFILE%/.genai-traffic-harness/chrome-profile",
+"profileDirectory": ""
 ```
 
 To reset your local config later:
@@ -51,9 +58,9 @@ To reset your local config later:
 .\scripts\setup-chrome-default.ps1 -Force
 ```
 
-To use a different Chrome profile, change `profileDirectory` in `config\targets.local.json` to `"Profile 1"`, `"Profile 2"`, or whichever profile folder Chrome uses.
+To use a different automation profile, change `userDataDir` in `config\targets.local.json`.
 
-To use Edge instead, set `browser.userDataDir` and `browser.profileDirectory` in `config\targets.local.json`.
+To use Edge instead, set `browser.channel` to `"msedge"` and use a dedicated Edge automation profile folder for `browser.userDataDir`.
 
    Common Windows paths:
 
@@ -62,7 +69,7 @@ To use Edge instead, set `browser.userDataDir` and `browser.profileDirectory` in
    C:\Users\<you>\AppData\Local\Microsoft\Edge\User Data
    ```
 
-Use `profileDirectory: "Default"` or `profileDirectory: "Profile 1"` to select the profile inside that folder. A dedicated test browser profile is best. Chrome and Edge lock active profiles, so close that browser before running the harness with the same profile.
+Do not point Playwright at your real Chrome or Edge `Default` profile. Browser vendors increasingly block remote debugging against default profiles, and active profiles are also locked by running browser windows.
 
 ## Scheduled Runs
 
@@ -84,7 +91,7 @@ The browse-style default targets include OpenAI Platform, Anthropic Docs, Azure 
 
 `scripts\run-desktop-clients.ps1` runs desktop app automation only. By default it sends prompts to open Claude Desktop and ChatGPT Desktop windows. Codex is present as a disabled optional entry in `config\desktop-clients.local.json`; enable it only if you have a visible Codex app/window where pasted prompts make sense.
 
-`npm run run:all` runs `npm run run` first, then runs `scripts\run-desktop-clients.ps1`. It still exits when the configured browser and desktop sessions finish.
+`npm run run:all` runs `npm run run` first, then runs `scripts\run-desktop-clients.ps1`. It still exits when the configured browser and desktop sessions finish. If browser automation fails to launch, `run:all` warns and still tries desktop automation.
 
 The scheduled task created by `scripts\register-scheduled-task.ps1` runs browser automation only. If you also want thick-client activity on a schedule, create a separate scheduled task for `scripts\run-desktop-clients.ps1`.
 
@@ -92,7 +99,7 @@ The scheduled task created by `scripts\register-scheduled-task.ps1` runs browser
 
 Visible browser and desktop automation is most reliable while the Windows desktop session is active and unlocked. If you disconnect from RDP, Windows may leave the session running, but GUI automation can become flaky, especially for `SendKeys`-based desktop clients. For unattended runs, prefer browser automation and test your exact RDP/session behavior before relying on it.
 
-The harness does not bypass CAPTCHA, "are you a robot" checks, sign-in flows, MFA, paywalls, or access-control prompts. If a page asks for login, the intended flow is to log in manually in Chrome first, then rerun the harness using that logged-in profile. If a robot check appears, handle it manually or disable that target. Failed targets are written to `runs.jsonl`.
+The harness does not bypass CAPTCHA, "are you a robot" checks, sign-in flows, MFA, paywalls, or access-control prompts. If a page asks for login, run `npm run login:chrome`, log in manually in the automation profile, close Chrome, then rerun the harness. If a robot check appears, handle it manually or disable that target. Failed targets are written to `runs.jsonl`.
 
 ## Target Types
 

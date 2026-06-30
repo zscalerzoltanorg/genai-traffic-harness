@@ -6,6 +6,7 @@
   "description": "Config-driven browser automation harness for GenAI and embedded AI SaaS usage simulation.",
   "scripts": {
     "setup:chrome": "powershell -ExecutionPolicy Bypass -File scripts/setup-chrome-default.ps1",
+    "login:chrome": "powershell -ExecutionPolicy Bypass -File scripts/open-login-browser.ps1",
     "install:browsers": "playwright install chromium",
     "fixtures": "node src/generate-fixtures.mjs",
     "run": "node src/runner.mjs",

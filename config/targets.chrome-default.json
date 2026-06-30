@@ -2,8 +2,8 @@
   "browser": {
     "channel": "chrome",
     "headless": false,
-    "userDataDir": "%USERPROFILE%/AppData/Local/Google/Chrome/User Data",
-    "profileDirectory": "Default",
+    "userDataDir": "%USERPROFILE%/.genai-traffic-harness/chrome-profile",
+    "profileDirectory": "",
     "viewport": {
       "width": 1440,
       "height": 950
@@ -13,7 +13,7 @@
     "sessions": 16,
     "minDelayMs": 4000,
     "maxDelayMs": 14000,
-    "defaultTimeoutMs": 25000,
+    "defaultTimeoutMs": 45000,
     "downloadDir": "downloads",
     "deleteDownloads": true,
     "logFile": "runs.jsonl",

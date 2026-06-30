@@ -1,6 +1,7 @@
 param(
   [string]$ProjectPath = (Resolve-Path "$PSScriptRoot\..").Path,
-  [switch]$SkipDesktop
+  [switch]$SkipDesktop,
+  [switch]$StopOnBrowserFailure
 )
 
 Set-StrictMode -Version Latest
@@ -10,6 +11,14 @@ Set-Location $ProjectPath
 
 Write-Host "Running browser automation..."
 npm run run
+$browserExitCode = $LASTEXITCODE
+
+if ($browserExitCode -ne 0) {
+  Write-Warning "Browser automation exited with code $browserExitCode."
+  if ($StopOnBrowserFailure) {
+    exit $browserExitCode
+  }
+}
 
 if ($SkipDesktop) {
   Write-Host "Skipping desktop client automation."

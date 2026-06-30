@@ -39,17 +39,40 @@ for ($i = 0; $i -lt [int]$config.sessions; $i++) {
 
   Write-Host "[$(Get-Date -Format o)] $($client.name): $category"
 
-  if (-not $shell.AppActivate([string]$client.windowTitle)) {
+  if (-not (Activate-ClientWindow $client)) {
     Write-Warning "Could not activate a window matching '$($client.windowTitle)'. Open the app and try again."
     continue
   }
 
   Start-Sleep -Seconds 2
   [System.Windows.Forms.Clipboard]::SetText($text)
-  $shell.SendKeys("^v")
+  [System.Windows.Forms.SendKeys]::SendWait("^v")
   Start-Sleep -Milliseconds 300
-  $shell.SendKeys("{ENTER}")
+  [System.Windows.Forms.SendKeys]::SendWait("{ENTER}")
 
   $delay = Get-Random -Minimum ([int]$config.minDelaySeconds) -Maximum ([int]$config.maxDelaySeconds + 1)
   Start-Sleep -Seconds $delay
+}
+
+function Activate-ClientWindow {
+  param(
+    [Parameter(Mandatory = $true)]
+    [object]$Client
+  )
+
+  $patterns = @()
+  if ($Client.PSObject.Properties.Name -contains "windowTitlePatterns") {
+    $patterns += @($Client.windowTitlePatterns)
+  }
+  if ($Client.PSObject.Properties.Name -contains "windowTitle") {
+    $patterns += [string]$Client.windowTitle
+  }
+
+  foreach ($pattern in ($patterns | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -Unique)) {
+    if ($shell.AppActivate([string]$pattern)) {
+      return $true
+    }
+  }
+
+  return $false
 }

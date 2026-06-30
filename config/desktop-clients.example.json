@@ -14,17 +14,20 @@
     {
       "name": "Claude Desktop",
       "enabled": true,
-      "windowTitle": "Claude"
+      "windowTitle": "Claude",
+      "windowTitlePatterns": ["Claude"]
     },
     {
       "name": "ChatGPT Desktop",
       "enabled": true,
-      "windowTitle": "ChatGPT"
+      "windowTitle": "ChatGPT",
+      "windowTitlePatterns": ["ChatGPT", "Unclear User Input", "Sensitive Data in File", "Test Successful", "Test Message Received", "Test Chat Response", "YubiKey or OAuth Token", "Test Received"]
     },
     {
       "name": "Codex",
       "enabled": false,
-      "windowTitle": "Codex"
+      "windowTitle": "Codex",
+      "windowTitlePatterns": ["Codex"]
     }
   ]
 }
