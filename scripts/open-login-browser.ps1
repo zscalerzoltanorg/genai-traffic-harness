@@ -27,6 +27,7 @@ $urls = @(
   "https://you.com/"
 )
 
-Start-Process -FilePath $chrome -ArgumentList @("--user-data-dir=$ProfilePath", "--no-first-run", "--new-window") + $urls
+$chromeArgs = @("--user-data-dir=$ProfilePath", "--no-first-run", "--new-window") + $urls
+Start-Process -FilePath $chrome -ArgumentList $chromeArgs
 Write-Host "Opened Chrome with automation profile: $ProfilePath"
 Write-Host "Log into the AI apps in this window, then close Chrome before running npm run run."
