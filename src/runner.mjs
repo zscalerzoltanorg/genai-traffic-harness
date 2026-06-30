@@ -2,10 +2,12 @@ import { chromium } from "playwright";
 import { appendFile, mkdir, readdir, rm, stat } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
+import { createInterface } from "node:readline/promises";
 
 const args = new Set(process.argv.slice(2));
 const dryRun = args.has("--dry-run");
 const noDelay = args.has("--no-delay");
+const pauseOnAuth = args.has("--pause-on-auth");
 const sessionOverride = getArgValue("--sessions");
 const targetFilter = getArgValue("--target");
 const kindFilter = getArgValue("--kind");
@@ -171,6 +173,13 @@ async function browse(page, target) {
 }
 
 async function chat(page, target) {
+  const gateState = await detectAccessGate(page);
+  if (gateState.gated) {
+    if (!(await pauseForManualResolution(page, target, gateState))) {
+      return gateState;
+    }
+  }
+
   const authState = await detectAuthRequired(page);
   if (authState.authRequired) {
     const googleAccess = await tryGoogleAuth(page, target);
@@ -180,6 +189,9 @@ async function chat(page, target) {
 
     const guestAccess = await tryGuestAccess(page, target);
     if (!guestAccess) {
+      if (await pauseForManualResolution(page, target, authState)) {
+        return await chat(page, target);
+      }
       return authState;
     }
   }
@@ -199,6 +211,54 @@ async function chat(page, target) {
 
   await humanPause(4000, 12000);
   return { promptCategory: prompt.category, uploaded };
+}
+
+async function detectAccessGate(page) {
+  const url = page.url();
+  const title = await page.title().catch(() => "");
+  const gateSelectors = [
+    "text=/verify you are human/i",
+    "text=/checking your browser/i",
+    "text=/just a moment/i",
+    ".cf-turnstile",
+    "iframe[src*='challenges.cloudflare.com']"
+  ];
+
+  if (/just a moment/i.test(title)) {
+    return { gated: true, challengeRequired: true, title, url };
+  }
+
+  for (const selector of gateSelectors) {
+    const locator = page.locator(selector).first();
+    if ((await locator.count().catch(() => 0)) > 0 && (await locator.isVisible().catch(() => false))) {
+      return { gated: true, challengeRequired: true, title, url };
+    }
+  }
+
+  return { gated: false };
+}
+
+async function pauseForManualResolution(page, target, state) {
+  if (!pauseOnAuth) return false;
+
+  console.warn(`Manual action needed for ${target.name}: ${state.challengeRequired ? "human verification" : "login/auth"}.`);
+  console.warn("Complete it in the browser window, then press Enter here to retry. Press Ctrl+C to stop.");
+
+  const rl = createInterface({ input: process.stdin, output: process.stdout });
+  try {
+    await rl.question("");
+  } finally {
+    rl.close();
+  }
+
+  await page.waitForLoadState("domcontentloaded", { timeout: 15000 }).catch(() => {});
+  await humanPause();
+
+  const gateState = await detectAccessGate(page);
+  if (gateState.gated) return false;
+
+  const authState = await detectAuthRequired(page);
+  return !authState.authRequired;
 }
 
 async function tryGoogleAuth(page, target) {

@@ -53,6 +53,8 @@ To prove a specific app works before using the random pool:
 npm run run:chatgpt
 ```
 
+If ChatGPT shows a human-verification or login page, this command keeps Chrome open and waits. Complete the browser prompt manually, then press Enter in the terminal so the runner can retry the chat input.
+
 You can also target any configured app by name:
 
 ```powershell
