@@ -199,14 +199,15 @@ function isBrowserClosedError(error) {
 async function runTarget(context, target) {
   const page = await context.newPage();
   page.setDefaultTimeout(runConfig.defaultTimeoutMs);
+  const startUrl = buildStartUrl(target);
 
   try {
-    await page.goto(target.url, { waitUntil: "domcontentloaded" });
+    await page.goto(startUrl, { waitUntil: "domcontentloaded" });
     await humanPause();
     await dismissOverlays(page);
 
-    if (target.kind === "browse") {
-      return await browse(page, target);
+    if (target.kind === "browse" || target.kind === "generated-browse") {
+      return await browse(page, target, startUrl);
     }
 
     if (target.kind === "chat") {
@@ -233,7 +234,7 @@ async function runTarget(context, target) {
   }
 }
 
-async function browse(page, target) {
+async function browse(page, target, startUrl) {
   const maxClicks = target.maxClicks ?? 1;
 
   for (let i = 0; i < randomInt(2, 5); i += 1) {
@@ -254,7 +255,36 @@ async function browse(page, target) {
     clicks += 1;
   }
 
-  return { browsed: true, clicks };
+  return { browsed: true, clicks, startUrl, finalUrl: page.url() };
+}
+
+function buildStartUrl(target) {
+  if (Array.isArray(target.urlTemplates) && target.urlTemplates.length > 0) {
+    const query = chooseBrowseQuery(target);
+    return choice(target.urlTemplates).replaceAll("{query}", encodeURIComponent(query));
+  }
+
+  if (Array.isArray(target.urls) && target.urls.length > 0) {
+    return choice(target.urls);
+  }
+
+  return target.url;
+}
+
+function chooseBrowseQuery(target) {
+  const queryPools = [];
+  if (Array.isArray(target.queries)) queryPools.push(...target.queries);
+  if (Array.isArray(config.browseQueries)) queryPools.push(...config.browseQueries);
+
+  const fallbackQueries = [
+    "enterprise AI agents platform",
+    "embedded AI chatbot SaaS",
+    "AI copilots for customer support",
+    "edge AI developer platform",
+    "agentic AI workflow automation"
+  ];
+
+  return choice(queryPools.length ? queryPools : fallbackQueries);
 }
 
 async function chat(page, target) {
@@ -711,7 +741,7 @@ function previewAction(target) {
     const prompt = buildPrompt(target);
     return { promptCategory: prompt.category, prompt: prompt.text, possibleTurns: chooseChatTurnCount(target) };
   }
-  return { url: target.url };
+  return { url: buildStartUrl(target) };
 }
 
 async function readJson(file) {
@@ -761,6 +791,7 @@ function chooseWeightedTarget(targets) {
 function defaultTargetWeight(target) {
   if (target.kind === "chat" || target.kind === "embedded-chat") return 5;
   if (target.kind === "isolated-chat") return 2;
+  if (target.kind === "generated-browse") return 2;
   if (target.kind === "download") return 1;
   return 1;
 }

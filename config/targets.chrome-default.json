@@ -31,6 +31,23 @@
       "creative"
     ]
   },
+  "browseQueries": [
+    "enterprise AI agents platform",
+    "Salesforce Agentforce use cases",
+    "Google AI Mode enterprise search",
+    "embedded AI copilot SaaS",
+    "AI chatbot for customer support",
+    "agentic AI workflow automation",
+    "AI governance prompt inspection",
+    "edge AI developer platform",
+    "AI assistant for CRM",
+    "AI code assistant enterprise",
+    "AI meeting assistant SaaS",
+    "multimodal AI app platform",
+    "AI search assistant for work",
+    "AI agent builder no code",
+    "retrieval augmented generation platform"
+  ],
   "targets": [
     {
       "name": "ChatGPT",
@@ -277,6 +294,35 @@
       "maxClicks": 2
     },
     {
+      "name": "Google AI Mode Search",
+      "enabled": true,
+      "kind": "generated-browse",
+      "weight": 3,
+      "urlTemplates": [
+        "https://www.google.com/search?udm=50&q={query}",
+        "https://www.google.com/search?q={query}"
+      ],
+      "queries": [
+        "compare AI agents for enterprise support",
+        "AI mode search embedded AI platform",
+        "agentic AI governance examples",
+        "edge AI application development",
+        "enterprise copilots for sales service and IT"
+      ],
+      "maxClicks": 2
+    },
+    {
+      "name": "AI Discovery Search",
+      "enabled": true,
+      "kind": "generated-browse",
+      "weight": 4,
+      "urlTemplates": [
+        "https://www.bing.com/search?q={query}",
+        "https://www.google.com/search?q={query}"
+      ],
+      "maxClicks": 3
+    },
+    {
       "name": "AI Product Docs Browse",
       "enabled": true,
       "kind": "browse",
@@ -340,10 +386,87 @@
       "maxClicks": 2
     },
     {
+      "name": "Devin",
+      "enabled": true,
+      "kind": "browse",
+      "url": "https://www.cognition.ai/devin",
+      "maxClicks": 2
+    },
+    {
+      "name": "Qodo",
+      "enabled": true,
+      "kind": "browse",
+      "url": "https://www.qodo.ai/",
+      "maxClicks": 2
+    },
+    {
+      "name": "Cohere",
+      "enabled": true,
+      "kind": "browse",
+      "url": "https://cohere.com/",
+      "maxClicks": 2
+    },
+    {
+      "name": "Together AI",
+      "enabled": true,
+      "kind": "browse",
+      "url": "https://www.together.ai/",
+      "maxClicks": 2
+    },
+    {
+      "name": "Fireworks AI",
+      "enabled": true,
+      "kind": "browse",
+      "url": "https://fireworks.ai/",
+      "maxClicks": 2
+    },
+    {
+      "name": "LangChain",
+      "enabled": true,
+      "kind": "browse",
+      "url": "https://www.langchain.com/",
+      "maxClicks": 2
+    },
+    {
+      "name": "LlamaIndex",
+      "enabled": true,
+      "kind": "browse",
+      "url": "https://www.llamaindex.ai/",
+      "maxClicks": 2
+    },
+    {
+      "name": "Pinecone",
+      "enabled": true,
+      "kind": "browse",
+      "url": "https://www.pinecone.io/",
+      "maxClicks": 2
+    },
+    {
+      "name": "Snowflake Cortex AI",
+      "enabled": true,
+      "kind": "browse",
+      "url": "https://www.snowflake.com/en/data-cloud/snowflake-cortex/",
+      "maxClicks": 2
+    },
+    {
+      "name": "Databricks Mosaic AI",
+      "enabled": true,
+      "kind": "browse",
+      "url": "https://www.databricks.com/product/machine-learning",
+      "maxClicks": 2
+    },
+    {
       "name": "Salesforce AI",
       "enabled": true,
       "kind": "browse",
       "url": "https://www.salesforce.com/artificial-intelligence/",
+      "maxClicks": 2
+    },
+    {
+      "name": "Salesforce Agentforce",
+      "enabled": true,
+      "kind": "browse",
+      "url": "https://www.salesforce.com/agentforce/",
       "maxClicks": 2
     },
     {
@@ -372,6 +495,97 @@
       "enabled": true,
       "kind": "browse",
       "url": "https://www.servicenow.com/products/ai-agents.html",
+      "maxClicks": 2
+    },
+    {
+      "name": "Microsoft Copilot Studio",
+      "enabled": true,
+      "kind": "browse",
+      "url": "https://www.microsoft.com/en-us/microsoft-copilot/microsoft-copilot-studio",
+      "maxClicks": 2
+    },
+    {
+      "name": "Google Agentspace",
+      "enabled": true,
+      "kind": "browse",
+      "url": "https://cloud.google.com/products/agentspace",
+      "maxClicks": 2
+    },
+    {
+      "name": "Google Agent Builder",
+      "enabled": true,
+      "kind": "browse",
+      "url": "https://cloud.google.com/products/agent-builder",
+      "maxClicks": 2
+    },
+    {
+      "name": "AWS Bedrock Agents",
+      "enabled": true,
+      "kind": "browse",
+      "url": "https://aws.amazon.com/bedrock/agents/",
+      "maxClicks": 2
+    },
+    {
+      "name": "Azure AI Foundry",
+      "enabled": true,
+      "kind": "browse",
+      "url": "https://azure.microsoft.com/en-us/products/ai-foundry/",
+      "maxClicks": 2
+    },
+    {
+      "name": "IBM watsonx",
+      "enabled": true,
+      "kind": "browse",
+      "url": "https://www.ibm.com/watsonx",
+      "maxClicks": 2
+    },
+    {
+      "name": "Oracle AI",
+      "enabled": true,
+      "kind": "browse",
+      "url": "https://www.oracle.com/artificial-intelligence/",
+      "maxClicks": 2
+    },
+    {
+      "name": "SAP Business AI",
+      "enabled": true,
+      "kind": "browse",
+      "url": "https://www.sap.com/products/artificial-intelligence.html",
+      "maxClicks": 2
+    },
+    {
+      "name": "Workday AI",
+      "enabled": true,
+      "kind": "browse",
+      "url": "https://www.workday.com/en-us/products/artificial-intelligence.html",
+      "maxClicks": 2
+    },
+    {
+      "name": "Glean",
+      "enabled": true,
+      "kind": "browse",
+      "url": "https://www.glean.com/",
+      "maxClicks": 2
+    },
+    {
+      "name": "Moveworks",
+      "enabled": true,
+      "kind": "browse",
+      "url": "https://www.moveworks.com/",
+      "maxClicks": 2
+    },
+    {
+      "name": "Ada AI Agent",
+      "enabled": true,
+      "kind": "browse",
+      "url": "https://www.ada.cx/",
+      "maxClicks": 2
+    },
+    {
+      "name": "LivePerson Conversational AI",
+      "enabled": true,
+      "kind": "browse",
+      "url": "https://www.liveperson.com/products/conversational-ai/",
       "maxClicks": 2
     },
     {
@@ -484,6 +698,62 @@
       "enabled": true,
       "kind": "browse",
       "url": "https://www.synthesia.io/",
+      "maxClicks": 2
+    },
+    {
+      "name": "HeyGen",
+      "enabled": true,
+      "kind": "browse",
+      "url": "https://www.heygen.com/",
+      "maxClicks": 2
+    },
+    {
+      "name": "Descript AI",
+      "enabled": true,
+      "kind": "browse",
+      "url": "https://www.descript.com/ai",
+      "maxClicks": 2
+    },
+    {
+      "name": "Airtable AI",
+      "enabled": true,
+      "kind": "browse",
+      "url": "https://www.airtable.com/ai",
+      "maxClicks": 2
+    },
+    {
+      "name": "Box AI",
+      "enabled": true,
+      "kind": "browse",
+      "url": "https://www.box.com/ai",
+      "maxClicks": 2
+    },
+    {
+      "name": "Dropbox Dash",
+      "enabled": true,
+      "kind": "browse",
+      "url": "https://www.dropbox.com/dash",
+      "maxClicks": 2
+    },
+    {
+      "name": "Zapier AI",
+      "enabled": true,
+      "kind": "browse",
+      "url": "https://zapier.com/ai",
+      "maxClicks": 2
+    },
+    {
+      "name": "Make AI",
+      "enabled": true,
+      "kind": "browse",
+      "url": "https://www.make.com/en/ai",
+      "maxClicks": 2
+    },
+    {
+      "name": "Lindy AI",
+      "enabled": true,
+      "kind": "browse",
+      "url": "https://www.lindy.ai/",
       "maxClicks": 2
     },
     {

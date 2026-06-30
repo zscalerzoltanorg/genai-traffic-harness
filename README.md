@@ -82,6 +82,18 @@ For prompt-heavy testing biased toward the chat apps that have been most reliabl
 npm run run:stable-prompts
 ```
 
+For AI-related discovery browsing with generated search queries:
+
+```powershell
+npm run run:ai-discovery
+```
+
+For a larger mixed run that keeps most traffic AI/app related while also varying search and browse destinations:
+
+```powershell
+npm run run:ai-mix
+```
+
 To touch each normal chat target once:
 
 ```powershell
@@ -106,7 +118,7 @@ npm run run -- --all-targets --fast --sessions=15
    npm run run:all
    ```
 
-`npm run setup:chrome` copies `config\targets.chrome-default.json` to `config\targets.local.json`. That default enables ChatGPT, Claude Web, Perplexity, DeepSeek, Gemini, Poe, You.com, Mistral Le Chat, HuggingChat, Meta AI, and dozens of AI/embedded-AI SaaS browse targets. Microsoft Copilot is included in the file but disabled by default. It uses:
+`npm run setup:chrome` copies `config\targets.chrome-default.json` to `config\targets.local.json`. That default enables ChatGPT, Claude Web, Perplexity, DeepSeek, Gemini, Poe, You.com, Mistral Le Chat, HuggingChat, Meta AI, generated AI discovery search, and dozens of AI/embedded-AI SaaS browse targets. Microsoft Copilot desktop is not used; Microsoft Copilot Studio is included as a normal web browse target. It uses:
 
 ```json
 "channel": "chrome",
@@ -149,7 +161,7 @@ The task runs `scripts\run-once.ps1`, which calls `npm run run`.
 
 Plain `npm run run` does not visit every configured target. It runs the configured number of random sessions. Use `npm run run:all-targets` when you want one pass across every enabled target.
 
-Random runs are weighted toward real chat targets, so prompt-bearing traffic should appear more often than simple browsing. For the highest prompt volume, use `npm run run:prompts`.
+Random runs are weighted toward real chat targets and AI discovery targets, so most traffic should stay AI/app related. For the highest prompt volume, use `npm run run:stable-prompts` or `npm run run:prompts`. For broader AI SaaS/category coverage, use `npm run run:ai-mix`.
 
 The chat-style default targets are ChatGPT, Claude Web, Perplexity, DeepSeek, Google Gemini, Poe, You.com, Mistral Le Chat, HuggingChat, and Meta AI. Chat sessions are intentionally varied: most are one prompt, some become short 2-3 turn conversations, and file upload is decided once per session. When an upload happens, it is attached only before the first prompt so later follow-ups look like a normal conversation.
 
@@ -157,7 +169,7 @@ Some chat apps require accounts. The scalable approach is to manually authentica
 
 For chat apps with a visible "Continue with Google" button, the runner can try that button when `auth.googleSelectors` is configured. If a Google account picker appears, it clicks the first visible account by default. To prefer a specific account without committing it to Git, add `"googleAccount": "you@example.com"` under that target's local `auth` object in `config\targets.local.json`.
 
-The browse-style default targets include OpenAI Platform, Anthropic Docs, Azure AI, NVIDIA Embedded AI, Hugging Face, GitHub Copilot, Cursor, Windsurf, Replit AI, Sourcegraph Cody, Tabnine, Salesforce AI, HubSpot AI, Zendesk AI, Intercom Fin, ServiceNow AI Agents, Notion AI, Canva Magic Studio, Grammarly AI, Atlassian Rovo, Slack AI, Zoom AI Companion, Figma AI, Adobe Firefly, Runway, Midjourney, Ideogram, ElevenLabs, Jasper, Copy.ai, Gamma, Synthesia, NotebookLM, and GroqCloud.
+The browse-style default targets include OpenAI Platform, Anthropic Docs, Google AI Mode search, Google Agent Builder, Google Agentspace, Azure AI Foundry, AWS Bedrock Agents, NVIDIA Embedded AI, Hugging Face, GitHub Copilot, Cursor, Windsurf, Replit AI, Sourcegraph Cody, Tabnine, Devin, Cohere, Together AI, Fireworks AI, LangChain, LlamaIndex, Pinecone, Snowflake Cortex AI, Databricks Mosaic AI, Salesforce Agentforce, Salesforce AI, HubSpot AI, Zendesk AI, Intercom Fin, ServiceNow AI Agents, Microsoft Copilot Studio, IBM watsonx, Oracle AI, SAP Business AI, Workday AI, Glean, Moveworks, Ada, LivePerson, Notion AI, Canva Magic Studio, Grammarly AI, Atlassian Rovo, Slack AI, Zoom AI Companion, Figma AI, Adobe Firefly, Runway, Midjourney, Ideogram, ElevenLabs, Jasper, Copy.ai, Gamma, Synthesia, HeyGen, Descript AI, Airtable AI, Box AI, Dropbox Dash, Zapier AI, Make AI, Lindy AI, NotebookLM, and GroqCloud.
 
 `scripts\run-desktop-clients.ps1` runs desktop app automation only. By default it sends prompts to open Claude Desktop and ChatGPT Desktop windows. Codex is present as a disabled optional entry in `config\desktop-clients.local.json`; enable it only if you have a visible Codex app/window where pasted prompts make sense.
 
@@ -184,6 +196,7 @@ The harness does not bypass CAPTCHA, "are you a robot" checks, MFA, paywalls, or
 ## Target Types
 
 - `browse`: Opens a page, scrolls, clicks safe links, and idles briefly.
+- `generated-browse`: Builds an AI-related search URL from configured query pools, opens it, scrolls, clicks safe links, and idles briefly.
 - `chat`: Opens a page, finds a textbox/contenteditable input, and sends prompts.
 - `isolated-chat`: Opens a browser-isolated page, clicks an approximate input location, types with keyboard events, and presses Enter. This is for pixel-streamed pages where the app DOM is not available locally.
 - `embedded-chat`: Opens a SaaS page, clicks a chat launcher, then sends prompts.

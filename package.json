@@ -14,6 +14,8 @@
     "run:chatgpt": "node src/runner.mjs --target=ChatGPT --sessions=1 --pause-on-auth",
     "run:prompts": "node src/runner.mjs --kind=chat --sessions=25 --fast",
     "run:stable-prompts": "node src/runner.mjs --target=ChatGPT,Claude,Perplexity,Poe,You.com --sessions=25 --fast",
+    "run:ai-discovery": "node src/runner.mjs --kind=generated-browse --sessions=15 --fast",
+    "run:ai-mix": "node src/runner.mjs --sessions=40 --fast",
     "run:prompt-targets": "node src/runner.mjs --kind=chat --all-targets --fast",
     "run:quick": "node src/runner.mjs --sessions=8 --fast",
     "run:all-targets": "node src/runner.mjs --all-targets --fast",
