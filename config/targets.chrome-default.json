@@ -36,6 +36,9 @@
       "url": "https://chatgpt.com/",
       "uploadProbability": 0.6,
       "promptCategories": ["genai", "software", "creative", "policy"],
+      "auth": {
+        "guestSelectors": ["text=/try it first/i", "a:has-text('Try it first')", "button:has-text('Try it first')"]
+      },
       "selectors": {
         "input": ["textarea", "[contenteditable='true']", "[role='textbox']"],
         "send": ["button[aria-label*='Send' i]", "button[data-testid*='send' i]", "button[type='submit']"],
@@ -62,6 +65,9 @@
       "url": "https://www.perplexity.ai/",
       "uploadProbability": 0.45,
       "promptCategories": ["genai", "business", "software", "policy"],
+      "auth": {
+        "guestSelectors": ["text=/continue as guest/i", "text=/try without/i", "button:has-text('Continue as guest')"]
+      },
       "selectors": {
         "input": ["textarea", "[contenteditable='true']", "[role='textbox']"],
         "send": ["button[aria-label*='Submit' i]", "button[aria-label*='Send' i]", "button[type='submit']"],
@@ -101,6 +107,9 @@
       "url": "https://poe.com/",
       "uploadProbability": 0.35,
       "promptCategories": ["genai", "creative", "business"],
+      "auth": {
+        "guestSelectors": ["text=/continue as guest/i", "text=/try without/i", "button:has-text('Continue as guest')"]
+      },
       "selectors": {
         "input": ["textarea", "[contenteditable='true']", "[role='textbox']"],
         "send": ["button[aria-label*='Send' i]", "button[type='submit']"],
@@ -114,6 +123,9 @@
       "url": "https://you.com/",
       "uploadProbability": 0.35,
       "promptCategories": ["genai", "business", "software"],
+      "auth": {
+        "guestSelectors": ["text=/continue as guest/i", "text=/try without/i", "button:has-text('Continue as guest')"]
+      },
       "selectors": {
         "input": ["textarea", "[contenteditable='true']", "[role='textbox']", "input[type='text']"],
         "send": ["button[aria-label*='Send' i]", "button[type='submit']"],

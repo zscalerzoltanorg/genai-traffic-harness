@@ -166,7 +166,10 @@ async function browse(page, target) {
 async function chat(page, target) {
   const authState = await detectAuthRequired(page);
   if (authState.authRequired) {
-    return authState;
+    const guestAccess = await tryGuestAccess(page, target);
+    if (!guestAccess) {
+      return authState;
+    }
   }
 
   const prompt = buildPrompt(target);
@@ -184,6 +187,26 @@ async function chat(page, target) {
 
   await humanPause(4000, 12000);
   return { promptCategory: prompt.category, uploaded };
+}
+
+async function tryGuestAccess(page, target) {
+  const selectors = target.auth?.guestSelectors ?? [];
+  if (selectors.length === 0) return false;
+
+  for (const selector of selectors) {
+    const locator = page.locator(selector).first();
+    if ((await locator.count().catch(() => 0)) === 0) continue;
+    if (!(await locator.isVisible().catch(() => false))) continue;
+
+    await locator.click({ timeout: 5000 }).catch(() => {});
+    await page.waitForLoadState("domcontentloaded", { timeout: 10000 }).catch(() => {});
+    await humanPause();
+
+    const authState = await detectAuthRequired(page);
+    return !authState.authRequired;
+  }
+
+  return false;
 }
 
 async function detectAuthRequired(page) {
