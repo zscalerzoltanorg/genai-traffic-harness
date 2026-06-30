@@ -8,6 +8,8 @@ const args = new Set(process.argv.slice(2));
 const dryRun = args.has("--dry-run");
 const noDelay = args.has("--no-delay");
 const pauseOnAuth = args.has("--pause-on-auth");
+const fastMode = args.has("--fast");
+const allTargetsMode = args.has("--all-targets");
 const sessionOverride = getArgValue("--sessions");
 const targetFilter = getArgValue("--target");
 const kindFilter = getArgValue("--kind");
@@ -21,7 +23,8 @@ const prompts = await readJson(promptsPath);
 
 const enabledTargets = config.targets.filter((target) => {
   if (target.enabled === false) return false;
-  if (kindFilter && target.kind !== kindFilter) return false;
+  if (kindFilter === "chat-like" && !["chat", "isolated-chat", "embedded-chat"].includes(target.kind)) return false;
+  if (kindFilter && kindFilter !== "chat-like" && target.kind !== kindFilter) return false;
   if (targetFilter && !target.name.toLowerCase().includes(targetFilter.toLowerCase())) return false;
   return true;
 });
@@ -52,14 +55,23 @@ if (sessionOverride) {
   }
 }
 
+if (fastMode) {
+  runConfig.minDelayMs = Math.min(runConfig.minDelayMs, 1000);
+  runConfig.maxDelayMs = Math.min(runConfig.maxDelayMs, 3000);
+}
+
+const plannedTargets = allTargetsMode
+  ? shuffle(enabledTargets).slice(0, sessionOverride ? runConfig.sessions : enabledTargets.length)
+  : Array.from({ length: runConfig.sessions }, () => choice(enabledTargets));
+
 const downloadDir = path.resolve(runConfig.downloadDir);
 await mkdir(downloadDir, { recursive: true });
 
 const context = dryRun ? null : await launchContext(config.browser ?? {}, downloadDir);
 
 try {
-  for (let session = 0; session < runConfig.sessions; session += 1) {
-    const target = choice(enabledTargets);
+  for (let session = 0; session < plannedTargets.length; session += 1) {
+    const target = plannedTargets[session];
     const event = {
       ts: new Date().toISOString(),
       dryRun,
@@ -86,7 +98,7 @@ try {
     await appendJsonLine(runConfig.logFile, event);
     await cleanupDownloads(downloadDir, runConfig.deleteDownloads);
 
-    if (!noDelay && session < runConfig.sessions - 1) {
+    if (!noDelay && session < plannedTargets.length - 1) {
       await delay(randomInt(runConfig.minDelayMs, runConfig.maxDelayMs));
     }
   }
@@ -598,7 +610,10 @@ async function appendJsonLine(file, event) {
 }
 
 async function humanPause(min = runConfig.minDelayMs, max = runConfig.maxDelayMs) {
-  await delay(randomInt(min, max));
+  const bounds = fastMode
+    ? { min: Math.min(min, 1000), max: Math.min(max, 3500) }
+    : { min, max };
+  await delay(randomInt(bounds.min, Math.max(bounds.min, bounds.max)));
 }
 
 function delay(ms) {
@@ -611,6 +626,15 @@ function randomInt(min, max) {
 
 function choice(values) {
   return values[randomInt(0, values.length - 1)];
+}
+
+function shuffle(values) {
+  const copy = [...values];
+  for (let i = copy.length - 1; i > 0; i -= 1) {
+    const j = randomInt(0, i);
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
 }
 
 function expandConfigPath(value) {

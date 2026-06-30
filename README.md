@@ -61,6 +61,25 @@ You can also target any configured app by name:
 npm run run -- --target=ChatGPT --sessions=1
 npm run run -- --target="Claude Web" --sessions=1
 npm run run -- --kind=chat --sessions=5
+npm run run -- --kind=chat-like --sessions=5
+```
+
+For faster testing with shorter waits:
+
+```powershell
+npm run run:quick
+```
+
+To touch every enabled target once, shuffled, with shorter waits:
+
+```powershell
+npm run run:all-targets
+```
+
+This can take a while because the default catalog contains dozens of sites. To cap an all-targets run:
+
+```powershell
+npm run run -- --all-targets --fast --sessions=15
 ```
 
 6. To run browser automation and desktop app automation in one pass:
@@ -109,6 +128,8 @@ The task runs `scripts\run-once.ps1`, which calls `npm run run`.
 ## What Runs
 
 `npm run run` runs browser automation only. With the Chrome default config, it randomly chooses among enabled chat, browse, and download targets.
+
+Plain `npm run run` does not visit every configured target. It runs the configured number of random sessions. Use `npm run run:all-targets` when you want one pass across every enabled target.
 
 The chat-style default targets are ChatGPT, Claude Web, Perplexity, DeepSeek, Google Gemini, Poe, You.com, Mistral Le Chat, HuggingChat, and Meta AI. Chat sessions are intentionally varied: most are one prompt, some become short 2-3 turn conversations, and file upload is decided once per session. When an upload happens, it is attached only before the first prompt so later follow-ups look like a normal conversation.
 
