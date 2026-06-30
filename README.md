@@ -134,6 +134,7 @@ The harness does not bypass CAPTCHA, "are you a robot" checks, MFA, paywalls, or
 
 - `browse`: Opens a page, scrolls, clicks safe links, and idles briefly.
 - `chat`: Opens a page, finds a textbox/contenteditable input, and sends prompts.
+- `isolated-chat`: Opens a browser-isolated page, clicks an approximate input location, types with keyboard events, and presses Enter. This is for pixel-streamed pages where the app DOM is not available locally.
 - `embedded-chat`: Opens a SaaS page, clicks a chat launcher, then sends prompts.
 - `download`: Opens a page and clicks configured download selectors or links.
 

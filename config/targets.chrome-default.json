@@ -82,10 +82,17 @@
     {
       "name": "DeepSeek",
       "enabled": true,
-      "kind": "chat",
+      "kind": "isolated-chat",
       "url": "https://chat.deepseek.com/",
-      "uploadProbability": 0.45,
+      "uploadProbability": 0,
       "promptCategories": ["genai", "software", "business"],
+      "isolation": {
+        "settleMs": 15000,
+        "inputClick": {
+          "xRatio": 0.5,
+          "yRatio": 0.86
+        }
+      },
       "auth": {
         "googleSelectors": ["button:has-text('Continue with Google')", "text=/continue with google/i"]
       },

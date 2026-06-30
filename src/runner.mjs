@@ -132,6 +132,10 @@ async function runTarget(context, target) {
       return await chat(page, target);
     }
 
+    if (target.kind === "isolated-chat") {
+      return await isolatedChat(page, target);
+    }
+
     if (target.kind === "embedded-chat") {
       await clickFirstAvailable(page, target.selectors?.launcher ?? []);
       await humanPause();
@@ -211,6 +215,30 @@ async function chat(page, target) {
 
   await humanPause(4000, 12000);
   return { promptCategory: prompt.category, uploaded };
+}
+
+async function isolatedChat(page, target) {
+  const prompt = buildPrompt(target);
+  const viewport = page.viewportSize() ?? { width: 1440, height: 950 };
+  const clickPoint = target.isolation?.inputClick ?? { xRatio: 0.5, yRatio: 0.86 };
+  const settleMs = target.isolation?.settleMs ?? 12000;
+
+  await delay(settleMs);
+  await page.mouse.click(
+    Math.round(viewport.width * clickPoint.xRatio),
+    Math.round(viewport.height * clickPoint.yRatio)
+  );
+  await humanPause(800, 1800);
+  await page.keyboard.type(prompt.text, { delay: randomInt(10, 40) });
+  await humanPause(400, 1200);
+  await page.keyboard.press("Enter");
+  await humanPause(4000, 12000);
+
+  return {
+    promptCategory: prompt.category,
+    isolated: true,
+    uploaded: false
+  };
 }
 
 async function detectAccessGate(page) {
