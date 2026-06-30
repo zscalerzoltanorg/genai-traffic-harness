@@ -9,7 +9,8 @@
     "install:browsers": "playwright install chromium",
     "fixtures": "node src/generate-fixtures.mjs",
     "run": "node src/runner.mjs",
-    "run:dry": "node src/runner.mjs --dry-run",
+    "run:all": "powershell -ExecutionPolicy Bypass -File scripts/run-all.ps1",
+    "run:dry": "node src/runner.mjs --dry-run --sessions=5 --no-delay",
     "check": "node --check src/runner.mjs && node --check src/generate-fixtures.mjs"
   },
   "dependencies": {

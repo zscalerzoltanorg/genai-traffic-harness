@@ -31,7 +31,13 @@ Config-driven browser automation for generating low-rate, auditable GenAI and em
    npm run run
    ```
 
-`npm run setup:chrome` copies `config\targets.chrome-default.json` to `config\targets.local.json`. That default enables ChatGPT, Claude Web, several AI browsing targets, uploads, downloads, and cleanup. Microsoft Copilot is included in the file but disabled by default. It uses:
+5. To run browser automation and desktop app automation in one pass:
+
+   ```powershell
+   npm run run:all
+   ```
+
+`npm run setup:chrome` copies `config\targets.chrome-default.json` to `config\targets.local.json`. That default enables ChatGPT, Claude Web, Perplexity, DeepSeek, Gemini, Poe, You.com, Mistral Le Chat, HuggingChat, Meta AI, and dozens of AI/embedded-AI SaaS browse targets. Microsoft Copilot is included in the file but disabled by default. It uses:
 
 ```json
 "channel": "chrome",
@@ -70,16 +76,15 @@ The task runs `scripts\run-once.ps1`, which calls `npm run run`.
 
 ## What Runs
 
-`npm run run` runs browser automation only. With the Chrome default config, it randomly chooses among these enabled targets:
+`npm run run` runs browser automation only. With the Chrome default config, it randomly chooses among enabled chat, browse, and download targets.
 
-- ChatGPT web
-- Claude web
-- AI product docs browsing
-- NVIDIA embedded AI browsing
-- Hugging Face browsing
-- File download smoke testing
+The chat-style default targets are ChatGPT, Claude Web, Perplexity, DeepSeek, Google Gemini, Poe, You.com, Mistral Le Chat, HuggingChat, and Meta AI. Chat targets have higher upload probabilities than browse targets so file inspection gets regular exercise when the app exposes a normal file picker.
+
+The browse-style default targets include OpenAI Platform, Anthropic Docs, Azure AI, NVIDIA Embedded AI, Hugging Face, GitHub Copilot, Cursor, Windsurf, Replit AI, Sourcegraph Cody, Tabnine, Salesforce AI, HubSpot AI, Zendesk AI, Intercom Fin, ServiceNow AI Agents, Notion AI, Canva Magic Studio, Grammarly AI, Atlassian Rovo, Slack AI, Zoom AI Companion, Figma AI, Adobe Firefly, Runway, Midjourney, Ideogram, ElevenLabs, Jasper, Copy.ai, Gamma, Synthesia, NotebookLM, and GroqCloud.
 
 `scripts\run-desktop-clients.ps1` runs desktop app automation only. By default it sends prompts to open Claude Desktop and ChatGPT Desktop windows. Codex is present as a disabled optional entry in `config\desktop-clients.local.json`; enable it only if you have a visible Codex app/window where pasted prompts make sense.
+
+`npm run run:all` runs `npm run run` first, then runs `scripts\run-desktop-clients.ps1`. It still exits when the configured browser and desktop sessions finish.
 
 The scheduled task created by `scripts\register-scheduled-task.ps1` runs browser automation only. If you also want thick-client activity on a schedule, create a separate scheduled task for `scripts\run-desktop-clients.ps1`.
 

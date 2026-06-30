@@ -5,6 +5,8 @@ import process from "node:process";
 
 const args = new Set(process.argv.slice(2));
 const dryRun = args.has("--dry-run");
+const noDelay = args.has("--no-delay");
+const sessionOverride = getArgValue("--sessions");
 
 const configPath = path.resolve("config/targets.local.json");
 const fallbackConfigPath = path.resolve("config/targets.example.json");
@@ -31,6 +33,13 @@ const runConfig = {
   logFile: "runs.jsonl",
   ...(config.run ?? {})
 };
+
+if (sessionOverride) {
+  const parsedSessions = Number.parseInt(sessionOverride, 10);
+  if (Number.isInteger(parsedSessions) && parsedSessions > 0) {
+    runConfig.sessions = parsedSessions;
+  }
+}
 
 const downloadDir = path.resolve(runConfig.downloadDir);
 await mkdir(downloadDir, { recursive: true });
@@ -66,7 +75,7 @@ try {
     await appendJsonLine(runConfig.logFile, event);
     await cleanupDownloads(downloadDir, runConfig.deleteDownloads);
 
-    if (session < runConfig.sessions - 1) {
+    if (!noDelay && session < runConfig.sessions - 1) {
       await delay(randomInt(runConfig.minDelayMs, runConfig.maxDelayMs));
     }
   }
@@ -193,7 +202,8 @@ async function download(page, target) {
 }
 
 async function maybeUpload(page, target) {
-  if (!runConfig.allowUploads || Math.random() > runConfig.uploadProbability) return false;
+  const uploadProbability = target.uploadProbability ?? runConfig.uploadProbability;
+  if (!runConfig.allowUploads || Math.random() > uploadProbability) return false;
 
   const fixtures = await listFixtureFiles();
   if (fixtures.length === 0) return false;
@@ -339,4 +349,10 @@ function expandConfigPath(value) {
     .replace(/^~(?=$|[\\/])/, process.env.USERPROFILE || process.env.HOME || "~")
     .replace(/%([^%]+)%/g, (_, name) => process.env[name] ?? `%${name}%`)
     .replace(/\$env:([A-Za-z_][A-Za-z0-9_]*)/g, (_, name) => process.env[name] ?? `$env:${name}`);
+}
+
+function getArgValue(name) {
+  const prefix = `${name}=`;
+  const match = process.argv.slice(2).find((arg) => arg.startsWith(prefix));
+  return match ? match.slice(prefix.length) : "";
 }

@@ -10,7 +10,7 @@
     }
   },
   "run": {
-    "sessions": 8,
+    "sessions": 16,
     "minDelayMs": 4000,
     "maxDelayMs": 14000,
     "defaultTimeoutMs": 25000,
@@ -18,7 +18,7 @@
     "deleteDownloads": true,
     "logFile": "runs.jsonl",
     "allowUploads": true,
-    "uploadProbability": 0.3,
+    "uploadProbability": 0.25,
     "promptCategories": [
       "genai",
       "embedded-ai",
@@ -34,22 +34,12 @@
       "enabled": true,
       "kind": "chat",
       "url": "https://chatgpt.com/",
+      "uploadProbability": 0.6,
       "promptCategories": ["genai", "software", "creative", "policy"],
       "selectors": {
-        "input": [
-          "textarea",
-          "[contenteditable='true']",
-          "[role='textbox']"
-        ],
-        "send": [
-          "button[aria-label*='Send' i]",
-          "button[data-testid*='send' i]"
-        ],
-        "attach": [
-          "button[aria-label*='Attach' i]",
-          "button[aria-label*='Upload' i]",
-          "button:has-text('Attach')"
-        ]
+        "input": ["textarea", "[contenteditable='true']", "[role='textbox']"],
+        "send": ["button[aria-label*='Send' i]", "button[data-testid*='send' i]", "button[type='submit']"],
+        "attach": ["button[aria-label*='Attach' i]", "button[aria-label*='Upload' i]", "button:has-text('Attach')"]
       }
     },
     {
@@ -57,22 +47,116 @@
       "enabled": true,
       "kind": "chat",
       "url": "https://claude.ai/",
+      "uploadProbability": 0.6,
       "promptCategories": ["genai", "business", "software", "embedded-ai"],
       "selectors": {
-        "input": [
-          "textarea",
-          "[contenteditable='true']",
-          "[role='textbox']"
-        ],
-        "send": [
-          "button[aria-label*='Send' i]",
-          "button[type='submit']"
-        ],
-        "attach": [
-          "button[aria-label*='Attach' i]",
-          "button[aria-label*='Upload' i]",
-          "button:has-text('Attach')"
-        ]
+        "input": ["textarea", "[contenteditable='true']", "[role='textbox']"],
+        "send": ["button[aria-label*='Send' i]", "button[type='submit']"],
+        "attach": ["button[aria-label*='Attach' i]", "button[aria-label*='Upload' i]", "button:has-text('Attach')"]
+      }
+    },
+    {
+      "name": "Perplexity",
+      "enabled": true,
+      "kind": "chat",
+      "url": "https://www.perplexity.ai/",
+      "uploadProbability": 0.45,
+      "promptCategories": ["genai", "business", "software", "policy"],
+      "selectors": {
+        "input": ["textarea", "[contenteditable='true']", "[role='textbox']"],
+        "send": ["button[aria-label*='Submit' i]", "button[aria-label*='Send' i]", "button[type='submit']"],
+        "attach": ["button[aria-label*='Attach' i]", "button[aria-label*='Upload' i]", "button:has-text('Attach')"]
+      }
+    },
+    {
+      "name": "DeepSeek",
+      "enabled": true,
+      "kind": "chat",
+      "url": "https://chat.deepseek.com/",
+      "uploadProbability": 0.45,
+      "promptCategories": ["genai", "software", "business"],
+      "selectors": {
+        "input": ["textarea", "[contenteditable='true']", "[role='textbox']"],
+        "send": ["button[aria-label*='Send' i]", "button[type='submit']"],
+        "attach": ["button[aria-label*='Attach' i]", "button[aria-label*='Upload' i]", "button:has-text('Attach')"]
+      }
+    },
+    {
+      "name": "Google Gemini",
+      "enabled": true,
+      "kind": "chat",
+      "url": "https://gemini.google.com/app",
+      "uploadProbability": 0.45,
+      "promptCategories": ["genai", "business", "creative", "policy"],
+      "selectors": {
+        "input": ["textarea", "[contenteditable='true']", "[role='textbox']"],
+        "send": ["button[aria-label*='Send' i]", "button[type='submit']"],
+        "attach": ["button[aria-label*='Attach' i]", "button[aria-label*='Upload' i]", "button:has-text('Upload')"]
+      }
+    },
+    {
+      "name": "Poe",
+      "enabled": true,
+      "kind": "chat",
+      "url": "https://poe.com/",
+      "uploadProbability": 0.35,
+      "promptCategories": ["genai", "creative", "business"],
+      "selectors": {
+        "input": ["textarea", "[contenteditable='true']", "[role='textbox']"],
+        "send": ["button[aria-label*='Send' i]", "button[type='submit']"],
+        "attach": ["button[aria-label*='Attach' i]", "button[aria-label*='Upload' i]"]
+      }
+    },
+    {
+      "name": "You.com",
+      "enabled": true,
+      "kind": "chat",
+      "url": "https://you.com/",
+      "uploadProbability": 0.35,
+      "promptCategories": ["genai", "business", "software"],
+      "selectors": {
+        "input": ["textarea", "[contenteditable='true']", "[role='textbox']", "input[type='text']"],
+        "send": ["button[aria-label*='Send' i]", "button[type='submit']"],
+        "attach": ["button[aria-label*='Attach' i]", "button[aria-label*='Upload' i]"]
+      }
+    },
+    {
+      "name": "Mistral Le Chat",
+      "enabled": true,
+      "kind": "chat",
+      "url": "https://chat.mistral.ai/chat",
+      "uploadProbability": 0.35,
+      "promptCategories": ["genai", "software", "business"],
+      "selectors": {
+        "input": ["textarea", "[contenteditable='true']", "[role='textbox']"],
+        "send": ["button[aria-label*='Send' i]", "button[type='submit']"],
+        "attach": ["button[aria-label*='Attach' i]", "button[aria-label*='Upload' i]"]
+      }
+    },
+    {
+      "name": "HuggingChat",
+      "enabled": true,
+      "kind": "chat",
+      "url": "https://huggingface.co/chat/",
+      "uploadProbability": 0.3,
+      "promptCategories": ["genai", "software", "embedded-ai"],
+      "selectors": {
+        "input": ["textarea", "[contenteditable='true']", "[role='textbox']"],
+        "send": ["button[aria-label*='Send' i]", "button[type='submit']"],
+        "attach": ["button[aria-label*='Attach' i]", "button[aria-label*='Upload' i]"]
+      }
+    },
+    {
+      "name": "Meta AI",
+      "enabled": true,
+      "kind": "chat",
+      "url": "https://www.meta.ai/",
+      "uploadProbability": 0.25,
+      "promptCategories": ["genai", "creative", "business"],
+      "selectors": {
+        "input": ["textarea", "[contenteditable='true']", "[role='textbox']"],
+        "send": ["button[aria-label*='Send' i]", "button[type='submit']"],
+        "attach": ["button[aria-label*='Attach' i]", "button[aria-label*='Upload' i]"]
       }
     },
     {
@@ -80,22 +164,41 @@
       "enabled": false,
       "kind": "chat",
       "url": "https://copilot.microsoft.com/",
+      "uploadProbability": 0.35,
       "promptCategories": ["genai", "business", "software"],
       "selectors": {
-        "input": [
-          "textarea",
-          "[contenteditable='true']",
-          "[role='textbox']"
-        ],
-        "send": [
-          "button[aria-label*='Send' i]",
-          "button[type='submit']"
-        ],
-        "attach": [
-          "button[aria-label*='Attach' i]",
-          "button[aria-label*='Upload' i]"
-        ]
+        "input": ["textarea", "[contenteditable='true']", "[role='textbox']"],
+        "send": ["button[aria-label*='Send' i]", "button[type='submit']"],
+        "attach": ["button[aria-label*='Attach' i]", "button[aria-label*='Upload' i]"]
       }
+    },
+    {
+      "name": "GroqCloud",
+      "enabled": true,
+      "kind": "browse",
+      "url": "https://console.groq.com/",
+      "maxClicks": 2
+    },
+    {
+      "name": "NotebookLM",
+      "enabled": true,
+      "kind": "browse",
+      "url": "https://notebooklm.google.com/",
+      "maxClicks": 2
+    },
+    {
+      "name": "OpenAI Platform Docs",
+      "enabled": true,
+      "kind": "browse",
+      "url": "https://platform.openai.com/docs/",
+      "maxClicks": 2
+    },
+    {
+      "name": "Anthropic Docs",
+      "enabled": true,
+      "kind": "browse",
+      "url": "https://docs.anthropic.com/",
+      "maxClicks": 2
     },
     {
       "name": "AI Product Docs Browse",
@@ -119,17 +222,201 @@
       "maxClicks": 2
     },
     {
+      "name": "GitHub Copilot",
+      "enabled": true,
+      "kind": "browse",
+      "url": "https://github.com/features/copilot",
+      "maxClicks": 2
+    },
+    {
+      "name": "Cursor",
+      "enabled": true,
+      "kind": "browse",
+      "url": "https://www.cursor.com/",
+      "maxClicks": 2
+    },
+    {
+      "name": "Windsurf",
+      "enabled": true,
+      "kind": "browse",
+      "url": "https://windsurf.com/",
+      "maxClicks": 2
+    },
+    {
+      "name": "Replit AI",
+      "enabled": true,
+      "kind": "browse",
+      "url": "https://replit.com/ai",
+      "maxClicks": 2
+    },
+    {
+      "name": "Sourcegraph Cody",
+      "enabled": true,
+      "kind": "browse",
+      "url": "https://sourcegraph.com/cody",
+      "maxClicks": 2
+    },
+    {
+      "name": "Tabnine",
+      "enabled": true,
+      "kind": "browse",
+      "url": "https://www.tabnine.com/",
+      "maxClicks": 2
+    },
+    {
+      "name": "Salesforce AI",
+      "enabled": true,
+      "kind": "browse",
+      "url": "https://www.salesforce.com/artificial-intelligence/",
+      "maxClicks": 2
+    },
+    {
+      "name": "HubSpot AI",
+      "enabled": true,
+      "kind": "browse",
+      "url": "https://www.hubspot.com/products/artificial-intelligence",
+      "maxClicks": 2
+    },
+    {
+      "name": "Zendesk AI",
+      "enabled": true,
+      "kind": "browse",
+      "url": "https://www.zendesk.com/ai/",
+      "maxClicks": 2
+    },
+    {
+      "name": "Intercom Fin",
+      "enabled": true,
+      "kind": "browse",
+      "url": "https://www.intercom.com/fin",
+      "maxClicks": 2
+    },
+    {
+      "name": "ServiceNow AI Agents",
+      "enabled": true,
+      "kind": "browse",
+      "url": "https://www.servicenow.com/products/ai-agents.html",
+      "maxClicks": 2
+    },
+    {
+      "name": "Notion AI",
+      "enabled": true,
+      "kind": "browse",
+      "url": "https://www.notion.com/product/ai",
+      "maxClicks": 2
+    },
+    {
+      "name": "Canva Magic Studio",
+      "enabled": true,
+      "kind": "browse",
+      "url": "https://www.canva.com/magic/",
+      "maxClicks": 2
+    },
+    {
+      "name": "Grammarly AI",
+      "enabled": true,
+      "kind": "browse",
+      "url": "https://www.grammarly.com/ai",
+      "maxClicks": 2
+    },
+    {
+      "name": "Atlassian Rovo",
+      "enabled": true,
+      "kind": "browse",
+      "url": "https://www.atlassian.com/software/rovo",
+      "maxClicks": 2
+    },
+    {
+      "name": "Slack AI",
+      "enabled": true,
+      "kind": "browse",
+      "url": "https://slack.com/features/ai",
+      "maxClicks": 2
+    },
+    {
+      "name": "Zoom AI Companion",
+      "enabled": true,
+      "kind": "browse",
+      "url": "https://www.zoom.com/en/products/ai-assistant/",
+      "maxClicks": 2
+    },
+    {
+      "name": "Figma AI",
+      "enabled": true,
+      "kind": "browse",
+      "url": "https://www.figma.com/ai/",
+      "maxClicks": 2
+    },
+    {
+      "name": "Adobe Firefly",
+      "enabled": true,
+      "kind": "browse",
+      "url": "https://firefly.adobe.com/",
+      "maxClicks": 2
+    },
+    {
+      "name": "Runway",
+      "enabled": true,
+      "kind": "browse",
+      "url": "https://runwayml.com/",
+      "maxClicks": 2
+    },
+    {
+      "name": "Midjourney",
+      "enabled": true,
+      "kind": "browse",
+      "url": "https://www.midjourney.com/",
+      "maxClicks": 2
+    },
+    {
+      "name": "Ideogram",
+      "enabled": true,
+      "kind": "browse",
+      "url": "https://ideogram.ai/",
+      "maxClicks": 2
+    },
+    {
+      "name": "ElevenLabs",
+      "enabled": true,
+      "kind": "browse",
+      "url": "https://elevenlabs.io/",
+      "maxClicks": 2
+    },
+    {
+      "name": "Jasper",
+      "enabled": true,
+      "kind": "browse",
+      "url": "https://www.jasper.ai/",
+      "maxClicks": 2
+    },
+    {
+      "name": "Copy.ai",
+      "enabled": true,
+      "kind": "browse",
+      "url": "https://www.copy.ai/",
+      "maxClicks": 2
+    },
+    {
+      "name": "Gamma",
+      "enabled": true,
+      "kind": "browse",
+      "url": "https://gamma.app/",
+      "maxClicks": 2
+    },
+    {
+      "name": "Synthesia",
+      "enabled": true,
+      "kind": "browse",
+      "url": "https://www.synthesia.io/",
+      "maxClicks": 2
+    },
+    {
       "name": "Local Fixture Download Smoke",
       "enabled": true,
       "kind": "download",
       "url": "https://file-examples.com/",
       "selectors": {
-        "downloadLinks": [
-          "a[href$='.pdf']",
-          "a[href$='.docx']",
-          "a[href$='.xlsx']",
-          "a[href$='.csv']"
-        ]
+        "downloadLinks": ["a[href$='.pdf']", "a[href$='.docx']", "a[href$='.xlsx']", "a[href$='.csv']"]
       }
     }
   ]
