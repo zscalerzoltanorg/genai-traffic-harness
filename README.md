@@ -94,6 +94,12 @@ For a larger mixed run that keeps most traffic AI/app related while also varying
 npm run run:ai-mix
 ```
 
+For a long-running foreground repeat loop:
+
+```powershell
+npm run run -- --repeat --sessions=40 --repeat-delay-minutes=20 --fast
+```
+
 To touch each normal chat target once:
 
 ```powershell
@@ -155,6 +161,28 @@ After editing the config:
 
 The task runs `scripts\run-once.ps1`, which calls `npm run run`.
 
+For a repeating background task that starts now and again at user logon:
+
+```powershell
+npm run background:register
+```
+
+That registers `GenAI Traffic Harness Background`, runs `scripts\run-repeating.ps1`, and writes logs under `logs\background-*.log`. By default it runs 40 randomized sessions, waits 20 minutes, then repeats.
+
+To stop it without deleting the task:
+
+```powershell
+npm run background:stop
+```
+
+To stop and remove it:
+
+```powershell
+npm run background:remove
+```
+
+The background task is intentionally a Scheduled Task running as the interactive user, not a Windows Service. A true Windows Service runs in session 0 and is not reliable for logged-in Chrome profile automation. The task can run without a visible PowerShell window, but Chrome may still open in the desktop session because these sites are more reliable in headed Chrome than headless Chrome.
+
 ## What Runs
 
 `npm run run` runs browser automation only. With the Chrome default config, it randomly chooses among enabled chat, browse, and download targets.
@@ -162,6 +190,8 @@ The task runs `scripts\run-once.ps1`, which calls `npm run run`.
 Plain `npm run run` does not visit every configured target. It runs the configured number of random sessions. Use `npm run run:all-targets` when you want one pass across every enabled target.
 
 Random runs are weighted toward real chat targets and AI discovery targets, so most traffic should stay AI/app related. For the highest prompt volume, use `npm run run:stable-prompts` or `npm run run:prompts`. For broader AI SaaS/category coverage, use `npm run run:ai-mix`.
+
+Each target failure is logged to `runs.jsonl` and the runner continues to the next target. If Chrome itself closes or crashes, the runner closes any stale context and relaunches Chrome for the next target. In repeat mode, each cycle picks a fresh randomized target plan.
 
 The chat-style default targets are ChatGPT, Claude Web, Perplexity, DeepSeek, Google Gemini, Poe, You.com, Mistral Le Chat, HuggingChat, and Meta AI. Chat sessions are intentionally varied: most are one prompt, some become short 2-3 turn conversations, and file upload is decided once per session. When an upload happens, it is attached only before the first prompt so later follow-ups look like a normal conversation.
 

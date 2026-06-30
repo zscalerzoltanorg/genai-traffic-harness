@@ -10,7 +10,10 @@ const noDelay = args.has("--no-delay");
 const pauseOnAuth = args.has("--pause-on-auth");
 const fastMode = args.has("--fast");
 const allTargetsMode = args.has("--all-targets");
+const repeatMode = args.has("--repeat");
 const sessionOverride = getArgValue("--sessions");
+const cycleOverride = getArgValue("--cycles");
+const repeatDelayOverride = getArgValue("--repeat-delay-minutes");
 const targetFilter = getArgValue("--target");
 const kindFilter = getArgValue("--kind");
 
@@ -63,91 +66,110 @@ if (fastMode) {
   runConfig.maxDelayMs = Math.min(runConfig.maxDelayMs, 3000);
 }
 
-const plannedTargets = allTargetsMode
-  ? shuffle(enabledTargets).slice(0, sessionOverride ? runConfig.sessions : enabledTargets.length)
-  : Array.from({ length: runConfig.sessions }, () => chooseWeightedTarget(enabledTargets));
+const maxCycles = parsePositiveInteger(cycleOverride) ?? (repeatMode ? Number.POSITIVE_INFINITY : 1);
+const repeatDelayMinutes = parseNonNegativeInteger(repeatDelayOverride) ?? runConfig.repeatDelayMinutes ?? 15;
 
 const downloadDir = path.resolve(runConfig.downloadDir);
 await mkdir(downloadDir, { recursive: true });
 
-const summary = {
-  ok: 0,
-  failed: 0,
-  byKind: {},
-  prompts: 0,
-  uploads: 0,
-  authRequired: 0,
-  gated: 0
-};
+const summary = createSummary();
 
-const context = dryRun ? null : await launchContext(config.browser ?? {}, downloadDir);
-if (context) {
-  await closeInitialBlankPages(context).catch(() => {});
-}
+let context = null;
 
 try {
-  for (let session = 0; session < plannedTargets.length; session += 1) {
-    if (context && contextIsClosed(context)) {
+  for (let cycle = 1; cycle <= maxCycles; cycle += 1) {
+    const plannedTargets = planTargets();
+    console.log(`\nCycle ${cycle}${repeatMode ? " (repeat mode)" : ""}: ${plannedTargets.length} session(s)`);
+
+    for (let session = 0; session < plannedTargets.length; session += 1) {
+      const target = plannedTargets[session];
       const event = {
         ts: new Date().toISOString(),
         dryRun,
+        cycle,
         session: session + 1,
-        target: plannedTargets[session].name,
-        kind: plannedTargets[session].kind,
-        ok: false,
-        error: "Browser context closed before target could run"
+        target: target.name,
+        kind: target.kind
       };
-      updateSummary(summary, event);
-      await appendJsonLine(runConfig.logFile, event);
-      console.warn("Browser closed; stopping remaining sessions.");
-      break;
-    }
 
-    const target = plannedTargets[session];
-    let stopAfterEvent = false;
-    const event = {
-      ts: new Date().toISOString(),
-      dryRun,
-      session: session + 1,
-      target: target.name,
-      kind: target.kind
-    };
+      console.log(`[${event.ts}] ${dryRun ? "DRY " : ""}${target.kind}: ${target.name}`);
 
-    console.log(`[${event.ts}] ${dryRun ? "DRY " : ""}${target.kind}: ${target.name}`);
+      try {
+        if (dryRun) {
+          event.action = previewAction(target);
+        } else {
+          context = await ensureContext(context);
+          event.action = await runTarget(context, target);
+        }
+        event.ok = true;
+        updateSummary(summary, event);
+      } catch (error) {
+        event.ok = false;
+        event.error = error.message;
+        console.warn(`Target failed: ${target.name}: ${error.message}`);
+        updateSummary(summary, event);
 
-    try {
-      if (dryRun) {
-        event.action = previewAction(target);
-      } else {
-        event.action = await runTarget(context, target);
+        if (isBrowserClosedError(error)) {
+          context = await resetContext(context);
+          console.warn("Browser closed unexpectedly; relaunched on the next target.");
+        }
       }
-      event.ok = true;
-      updateSummary(summary, event);
-    } catch (error) {
-      event.ok = false;
-      event.error = error.message;
-      console.warn(`Target failed: ${target.name}: ${error.message}`);
-      updateSummary(summary, event);
-      stopAfterEvent = isBrowserClosedError(error);
+
+      await appendJsonLine(runConfig.logFile, event);
+      await cleanupDownloads(downloadDir, runConfig.deleteDownloads);
+
+      if (!noDelay && session < plannedTargets.length - 1) {
+        await delay(randomInt(runConfig.minDelayMs, runConfig.maxDelayMs));
+      }
     }
 
-    await appendJsonLine(runConfig.logFile, event);
-    await cleanupDownloads(downloadDir, runConfig.deleteDownloads);
+    printSummary(summary);
 
-    if (stopAfterEvent) {
-      console.warn("Browser closed unexpectedly; stopping remaining sessions.");
-      break;
-    }
-
-    if (!noDelay && session < plannedTargets.length - 1) {
-      await delay(randomInt(runConfig.minDelayMs, runConfig.maxDelayMs));
+    if (cycle < maxCycles) {
+      if (repeatMode) {
+        context = await resetContext(context);
+      }
+      console.log(`Waiting ${repeatDelayMinutes} minute(s) before next cycle...`);
+      await delay(repeatDelayMinutes * 60 * 1000);
     }
   }
 } finally {
-  if (context) {
-    await context.close().catch(() => {});
-  }
+  context = await resetContext(context);
   printSummary(summary);
+}
+
+function createSummary() {
+  return {
+    ok: 0,
+    failed: 0,
+    byKind: {},
+    prompts: 0,
+    uploads: 0,
+    authRequired: 0,
+    gated: 0
+  };
+}
+
+function planTargets() {
+  return allTargetsMode
+    ? shuffle(enabledTargets).slice(0, sessionOverride ? runConfig.sessions : enabledTargets.length)
+    : Array.from({ length: runConfig.sessions }, () => chooseWeightedTarget(enabledTargets));
+}
+
+async function ensureContext(existingContext) {
+  if (dryRun) return null;
+  if (existingContext && !contextIsClosed(existingContext)) return existingContext;
+
+  const nextContext = await launchContext(config.browser ?? {}, downloadDir);
+  await closeInitialBlankPages(nextContext).catch(() => {});
+  return nextContext;
+}
+
+async function resetContext(existingContext) {
+  if (existingContext) {
+    await existingContext.close().catch(() => {});
+  }
+  return null;
 }
 
 async function launchContext(browserConfig, downloadsPath) {
@@ -816,6 +838,18 @@ function getArgValue(name) {
   const prefix = `${name}=`;
   const match = process.argv.slice(2).find((arg) => arg.startsWith(prefix));
   return match ? match.slice(prefix.length) : "";
+}
+
+function parsePositiveInteger(value) {
+  if (!value) return null;
+  const parsed = Number.parseInt(value, 10);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
+}
+
+function parseNonNegativeInteger(value) {
+  if (value === "") return null;
+  const parsed = Number.parseInt(value, 10);
+  return Number.isInteger(parsed) && parsed >= 0 ? parsed : null;
 }
 
 function updateSummary(stats, event) {
