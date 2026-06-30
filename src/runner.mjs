@@ -7,6 +7,8 @@ const args = new Set(process.argv.slice(2));
 const dryRun = args.has("--dry-run");
 const noDelay = args.has("--no-delay");
 const sessionOverride = getArgValue("--sessions");
+const targetFilter = getArgValue("--target");
+const kindFilter = getArgValue("--kind");
 
 const configPath = path.resolve("config/targets.local.json");
 const fallbackConfigPath = path.resolve("config/targets.example.json");
@@ -15,9 +17,14 @@ const promptsPath = path.resolve("config/prompts.json");
 const config = await readJson(configPath).catch(() => readJson(fallbackConfigPath));
 const prompts = await readJson(promptsPath);
 
-const enabledTargets = config.targets.filter((target) => target.enabled !== false);
+const enabledTargets = config.targets.filter((target) => {
+  if (target.enabled === false) return false;
+  if (kindFilter && target.kind !== kindFilter) return false;
+  if (targetFilter && !target.name.toLowerCase().includes(targetFilter.toLowerCase())) return false;
+  return true;
+});
 if (enabledTargets.length === 0) {
-  throw new Error("No enabled targets found. Edit config/targets.local.json and enable at least one target.");
+  throw new Error("No enabled targets found for the requested filters. Check --target, --kind, or config/targets.local.json.");
 }
 
 const runConfig = {

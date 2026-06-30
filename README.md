@@ -47,6 +47,20 @@ Config-driven browser automation for generating low-rate, auditable GenAI and em
    npm run run
    ```
 
+To prove a specific app works before using the random pool:
+
+```powershell
+npm run run:chatgpt
+```
+
+You can also target any configured app by name:
+
+```powershell
+npm run run -- --target=ChatGPT --sessions=1
+npm run run -- --target="Claude Web" --sessions=1
+npm run run -- --kind=chat --sessions=5
+```
+
 6. To run browser automation and desktop app automation in one pass:
 
    ```powershell
