@@ -31,7 +31,7 @@ Config-driven browser automation for generating low-rate, auditable GenAI and em
    npm run run
    ```
 
-`npm run setup:chrome` copies `config\targets.chrome-default.json` to `config\targets.local.json`. That default enables ChatGPT, Claude Web, Microsoft Copilot, several AI browsing targets, uploads, downloads, and cleanup. It uses:
+`npm run setup:chrome` copies `config\targets.chrome-default.json` to `config\targets.local.json`. That default enables ChatGPT, Claude Web, several AI browsing targets, uploads, downloads, and cleanup. Microsoft Copilot is included in the file but disabled by default. It uses:
 
 ```json
 "channel": "chrome",
@@ -67,6 +67,27 @@ After editing the config:
 ```
 
 The task runs `scripts\run-once.ps1`, which calls `npm run run`.
+
+## What Runs
+
+`npm run run` runs browser automation only. With the Chrome default config, it randomly chooses among these enabled targets:
+
+- ChatGPT web
+- Claude web
+- AI product docs browsing
+- NVIDIA embedded AI browsing
+- Hugging Face browsing
+- File download smoke testing
+
+`scripts\run-desktop-clients.ps1` runs desktop app automation only. By default it sends prompts to open Claude Desktop and ChatGPT Desktop windows. Codex is present as a disabled optional entry in `config\desktop-clients.local.json`; enable it only if you have a visible Codex app/window where pasted prompts make sense.
+
+The scheduled task created by `scripts\register-scheduled-task.ps1` runs browser automation only. If you also want thick-client activity on a schedule, create a separate scheduled task for `scripts\run-desktop-clients.ps1`.
+
+## RDP, Login, and Robot Checks
+
+Visible browser and desktop automation is most reliable while the Windows desktop session is active and unlocked. If you disconnect from RDP, Windows may leave the session running, but GUI automation can become flaky, especially for `SendKeys`-based desktop clients. For unattended runs, prefer browser automation and test your exact RDP/session behavior before relying on it.
+
+The harness does not bypass CAPTCHA, "are you a robot" checks, sign-in flows, MFA, paywalls, or access-control prompts. If a page asks for login, the intended flow is to log in manually in Chrome first, then rerun the harness using that logged-in profile. If a robot check appears, handle it manually or disable that target. Failed targets are written to `runs.jsonl`.
 
 ## Target Types
 

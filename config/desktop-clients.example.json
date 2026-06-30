@@ -22,9 +22,9 @@
       "windowTitle": "ChatGPT"
     },
     {
-      "name": "Microsoft Copilot Desktop",
+      "name": "Codex",
       "enabled": false,
-      "windowTitle": "Copilot"
+      "windowTitle": "Codex"
     }
   ]
 }

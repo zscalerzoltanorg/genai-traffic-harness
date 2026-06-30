@@ -77,7 +77,7 @@
     },
     {
       "name": "Microsoft Copilot",
-      "enabled": true,
+      "enabled": false,
       "kind": "chat",
       "url": "https://copilot.microsoft.com/",
       "promptCategories": ["genai", "business", "software"],
