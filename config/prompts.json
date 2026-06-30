@@ -1,0 +1,38 @@
+{
+  "genai": [
+    "Compare retrieval augmented generation with fine tuning for a support knowledge base.",
+    "Draft a neutral explanation of how model context windows affect enterprise workflows.",
+    "Create a checklist for evaluating an AI assistant embedded in a CRM.",
+    "Summarize risks of prompt injection for a product manager."
+  ],
+  "embedded-ai": [
+    "Explain how edge AI inference differs from cloud hosted inference for a factory camera.",
+    "List common sensors used in embedded AI products and the data each produces.",
+    "Design a simple architecture for an on-device anomaly detector.",
+    "What tradeoffs matter when deploying a small language model on an embedded device?"
+  ],
+  "business": [
+    "Write a short customer success email about adopting an AI copilot.",
+    "Create three discovery questions for a buyer evaluating AI governance software.",
+    "Summarize the difference between AI productivity tools and AI platform tools.",
+    "Draft an agenda for a 30 minute meeting about responsible AI rollout."
+  ],
+  "software": [
+    "Generate pseudocode for chunking documents before embedding them.",
+    "Explain how to test an API client that streams model responses.",
+    "Suggest a database schema for prompt evaluation results.",
+    "Write a concise bug report for a chatbot that loses conversation state."
+  ],
+  "policy": [
+    "Create a plain language policy for employees using AI tools with company data.",
+    "List safe handling rules for uploading files to third party AI services.",
+    "Draft a DLP testing plan using synthetic data only.",
+    "Explain why test data should be clearly labeled and separated from production data."
+  ],
+  "creative": [
+    "Brainstorm names for a dashboard that tracks AI assistant adoption.",
+    "Write a friendly intro paragraph for an internal AI enablement page.",
+    "Create five tagline options for an embedded AI developer toolkit.",
+    "Turn this topic into a short webinar abstract: GenAI governance for SaaS apps."
+  ]
+}

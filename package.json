@@ -1,0 +1,20 @@
+{
+  "name": "genai-traffic-harness",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Config-driven browser automation harness for GenAI and embedded AI SaaS usage simulation.",
+  "scripts": {
+    "install:browsers": "playwright install chromium",
+    "fixtures": "node src/generate-fixtures.mjs",
+    "run": "node src/runner.mjs",
+    "run:dry": "node src/runner.mjs --dry-run",
+    "check": "node --check src/runner.mjs && node --check src/generate-fixtures.mjs"
+  },
+  "dependencies": {
+    "playwright": "^1.45.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
