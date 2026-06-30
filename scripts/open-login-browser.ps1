@@ -19,6 +19,7 @@ if (-not $chrome) {
 New-Item -ItemType Directory -Path $ProfilePath -Force | Out-Null
 
 $urls = @(
+  "https://accounts.google.com/",
   "https://chatgpt.com/",
   "https://claude.ai/",
   "https://www.perplexity.ai/",

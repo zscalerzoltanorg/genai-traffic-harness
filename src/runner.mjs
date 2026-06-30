@@ -164,6 +164,11 @@ async function browse(page, target) {
 }
 
 async function chat(page, target) {
+  const authState = await detectAuthRequired(page);
+  if (authState.authRequired) {
+    return authState;
+  }
+
   const prompt = buildPrompt(target);
   const uploaded = await maybeUpload(page, target);
 
@@ -179,6 +184,40 @@ async function chat(page, target) {
 
   await humanPause(4000, 12000);
   return { promptCategory: prompt.category, uploaded };
+}
+
+async function detectAuthRequired(page) {
+  const url = page.url();
+  const authUrlPatterns = [
+    /\/auth\//i,
+    /\/login/i,
+    /\/signin/i,
+    /\/sign-in/i,
+    /accounts\.google\.com/i
+  ];
+
+  if (authUrlPatterns.some((pattern) => pattern.test(url))) {
+    return { authRequired: true, url };
+  }
+
+  const authSelectors = [
+    "text=/continue with google/i",
+    "text=/log in/i",
+    "text=/sign in/i",
+    "text=/sign up/i",
+    "button:has-text('Continue with Google')",
+    "button:has-text('Log in')",
+    "button:has-text('Sign in')"
+  ];
+
+  for (const selector of authSelectors) {
+    const locator = page.locator(selector).first();
+    if ((await locator.count().catch(() => 0)) > 0 && (await locator.isVisible().catch(() => false))) {
+      return { authRequired: true, url };
+    }
+  }
+
+  return { authRequired: false };
 }
 
 async function download(page, target) {

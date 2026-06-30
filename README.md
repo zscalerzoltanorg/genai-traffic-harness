@@ -29,7 +29,7 @@ Config-driven browser automation for generating low-rate, auditable GenAI and em
    npm run login:chrome
    ```
 
-   Close that Chrome window after logging in. The automation profile is separate from your regular Chrome profile because recent Chrome builds block Playwright remote debugging against the real default profile.
+   This opens Google Accounts plus the main chat apps in the dedicated automation profile. Sign into Google first, then visit each app tab and use its normal "Continue with Google" flow once. Close that Chrome window after logging in. The automation profile is separate from your regular Chrome profile because recent Chrome builds block Playwright remote debugging against the real default profile.
 
 4. Run a quick dry run, then run browser automation:
 
@@ -99,7 +99,7 @@ The scheduled task created by `scripts\register-scheduled-task.ps1` runs browser
 
 Visible browser and desktop automation is most reliable while the Windows desktop session is active and unlocked. If you disconnect from RDP, Windows may leave the session running, but GUI automation can become flaky, especially for `SendKeys`-based desktop clients. For unattended runs, prefer browser automation and test your exact RDP/session behavior before relying on it.
 
-The harness does not bypass CAPTCHA, "are you a robot" checks, sign-in flows, MFA, paywalls, or access-control prompts. If a page asks for login, run `npm run login:chrome`, log in manually in the automation profile, close Chrome, then rerun the harness. If a robot check appears, handle it manually or disable that target. Failed targets are written to `runs.jsonl`.
+The harness does not bypass CAPTCHA, "are you a robot" checks, sign-in flows, MFA, paywalls, or access-control prompts. If a page asks for login, run `npm run login:chrome`, log into Google in the automation profile, use each app's normal "Continue with Google" flow once, close Chrome, then rerun the harness. During normal runs, chat targets that still show login screens are logged as `authRequired` in `runs.jsonl` instead of receiving prompts. If a robot check appears, handle it manually or disable that target.
 
 ## Target Types
 
