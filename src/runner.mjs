@@ -82,12 +82,29 @@ const summary = {
 
 const context = dryRun ? null : await launchContext(config.browser ?? {}, downloadDir);
 if (context) {
-  await closeInitialBlankPages(context);
+  await closeInitialBlankPages(context).catch(() => {});
 }
 
 try {
   for (let session = 0; session < plannedTargets.length; session += 1) {
+    if (context && contextIsClosed(context)) {
+      const event = {
+        ts: new Date().toISOString(),
+        dryRun,
+        session: session + 1,
+        target: plannedTargets[session].name,
+        kind: plannedTargets[session].kind,
+        ok: false,
+        error: "Browser context closed before target could run"
+      };
+      updateSummary(summary, event);
+      await appendJsonLine(runConfig.logFile, event);
+      console.warn("Browser closed; stopping remaining sessions.");
+      break;
+    }
+
     const target = plannedTargets[session];
+    let stopAfterEvent = false;
     const event = {
       ts: new Date().toISOString(),
       dryRun,
@@ -111,10 +128,16 @@ try {
       event.error = error.message;
       console.warn(`Target failed: ${target.name}: ${error.message}`);
       updateSummary(summary, event);
+      stopAfterEvent = isBrowserClosedError(error);
     }
 
     await appendJsonLine(runConfig.logFile, event);
     await cleanupDownloads(downloadDir, runConfig.deleteDownloads);
+
+    if (stopAfterEvent) {
+      console.warn("Browser closed unexpectedly; stopping remaining sessions.");
+      break;
+    }
 
     if (!noDelay && session < plannedTargets.length - 1) {
       await delay(randomInt(runConfig.minDelayMs, runConfig.maxDelayMs));
@@ -122,7 +145,7 @@ try {
   }
 } finally {
   if (context) {
-    await context.close();
+    await context.close().catch(() => {});
   }
   printSummary(summary);
 }
@@ -141,7 +164,7 @@ async function launchContext(browserConfig, downloadsPath) {
   return chromium.launchPersistentContext(userDataDir, {
     channel,
     headless: browserConfig.headless ?? false,
-    chromiumSandbox: browserConfig.chromiumSandbox ?? true,
+    chromiumSandbox: browserConfig.chromiumSandbox ?? false,
     acceptDownloads: true,
     downloadsPath,
     viewport: browserConfig.viewport ?? { width: 1440, height: 950 },
@@ -151,11 +174,26 @@ async function launchContext(browserConfig, downloadsPath) {
 }
 
 async function closeInitialBlankPages(context) {
-  for (const page of context.pages()) {
+  const pages = context.pages();
+  if (pages.length <= 1) return;
+
+  for (const page of pages) {
     if (page.url() === "about:blank") {
       await page.close().catch(() => {});
     }
   }
+}
+
+function contextIsClosed(context) {
+  try {
+    return context.pages().length === 0;
+  } catch {
+    return true;
+  }
+}
+
+function isBrowserClosedError(error) {
+  return /target page, context or browser has been closed|browser has been closed|browser context.*closed/i.test(error.message ?? "");
 }
 
 async function runTarget(context, target) {
