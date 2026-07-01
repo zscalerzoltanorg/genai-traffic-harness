@@ -22,6 +22,7 @@
     "run:all": "powershell -ExecutionPolicy Bypass -File scripts/run-all.ps1",
     "run:dry": "node src/runner.mjs --dry-run --sessions=5 --no-delay",
     "background:register": "powershell -ExecutionPolicy Bypass -File scripts/register-background-task.ps1 -StartNow",
+    "background:status": "powershell -ExecutionPolicy Bypass -File scripts/background-status.ps1",
     "background:stop": "powershell -ExecutionPolicy Bypass -File scripts/stop-background-task.ps1",
     "background:remove": "powershell -ExecutionPolicy Bypass -File scripts/stop-background-task.ps1 -Unregister",
     "check": "node --check src/runner.mjs && node --check src/generate-fixtures.mjs"

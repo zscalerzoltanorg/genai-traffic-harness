@@ -7,6 +7,10 @@ param(
 
   [int]$RepeatDelayMinutes = 20,
 
+  [int]$StartupDelaySeconds = 180,
+
+  [int]$RestartDelaySeconds = 60,
+
   [string]$Target = "",
 
   [string]$Kind = "",
@@ -27,7 +31,9 @@ $argumentParts = @(
   "-File `"$scriptPath`"",
   "-ProjectPath `"$ProjectPath`"",
   "-Sessions $Sessions",
-  "-RepeatDelayMinutes $RepeatDelayMinutes"
+  "-RepeatDelayMinutes $RepeatDelayMinutes",
+  "-StartupDelaySeconds $StartupDelaySeconds",
+  "-RestartDelaySeconds $RestartDelaySeconds"
 )
 
 if ($Target.Trim().Length -gt 0) {
@@ -44,7 +50,14 @@ if ($NoFast) {
 
 $action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument ($argumentParts -join " ")
 $trigger = New-ScheduledTaskTrigger -AtLogOn
-$settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -MultipleInstances IgnoreNew -ExecutionTimeLimit (New-TimeSpan -Days 3650)
+$settings = New-ScheduledTaskSettingsSet `
+  -AllowStartIfOnBatteries `
+  -DontStopIfGoingOnBatteries `
+  -MultipleInstances IgnoreNew `
+  -ExecutionTimeLimit (New-TimeSpan -Days 3650) `
+  -RestartCount 3 `
+  -RestartInterval (New-TimeSpan -Minutes 1) `
+  -StartWhenAvailable
 $principal = New-ScheduledTaskPrincipal -UserId "$env:USERDOMAIN\$env:USERNAME" -LogonType Interactive -RunLevel Highest
 
 Register-ScheduledTask -TaskName $TaskName -Action $action -Trigger $trigger -Settings $settings -Principal $principal -Description "Runs the GenAI traffic harness in repeat mode as the logged-in desktop user." -Force
@@ -54,7 +67,7 @@ if ($StartNow) {
 }
 
 Write-Host "Registered scheduled task '$TaskName'."
-Write-Host "It runs at logon as $env:USERDOMAIN\$env:USERNAME and repeats inside the harness process."
+Write-Host "It runs at logon as $env:USERDOMAIN\$env:USERNAME, waits $StartupDelaySeconds second(s), and then supervises repeated harness cycles."
 Write-Host "Logs are written to: $(Join-Path $ProjectPath "logs")"
 if (-not $StartNow) {
   Write-Host "Start it now with: Start-ScheduledTask -TaskName `"$TaskName`""

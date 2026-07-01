@@ -167,7 +167,13 @@ For a repeating background task that starts now and again at user logon:
 npm run background:register
 ```
 
-That registers `GenAI Traffic Harness Background`, runs `scripts\run-repeating.ps1`, and writes logs under `logs\background-*.log`. By default it runs 40 randomized sessions, waits 20 minutes, then repeats.
+That registers `GenAI Traffic Harness Background`, runs `scripts\run-repeating.ps1`, and writes logs under `logs\background-*.log`. By default it waits 3 minutes after logon, runs 40 randomized sessions, waits 20 minutes, then starts the next batch. The PowerShell wrapper supervises the runner forever, so if a batch exits or crashes it logs the exit and starts the next batch after a short retry delay.
+
+To check the task state and the latest background log:
+
+```powershell
+npm run background:status
+```
 
 To stop it without deleting the task:
 
@@ -182,6 +188,8 @@ npm run background:remove
 ```
 
 The background task is intentionally a Scheduled Task running as the interactive user, not a Windows Service. A true Windows Service runs in session 0 and is not reliable for logged-in Chrome profile automation. The task can run without a visible PowerShell window, but Chrome may still open in the desktop session because these sites are more reliable in headed Chrome than headless Chrome.
+
+Important Windows behavior: this headed Chrome task starts after the Windows user logs on. If the EC2 instance boots at 6am but nobody has logged in yet, there is no interactive desktop session for visible Chrome automation to use. For unattended pre-login traffic, use the Amazon Linux/headless deployment or create a separate headless Windows task with a dedicated browser profile. The logged-in Chrome profile workflow is strongest after the desktop session exists.
 
 ## What Runs
 
