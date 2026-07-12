@@ -49,6 +49,8 @@ const runConfig = {
   uploadProbability: 0.2,
   multiTurnProbability: 0.35,
   maxChatTurns: 3,
+  sensitivePromptProbability: 0.06,
+  sensitivePromptCategories: ["dlp-pci", "dlp-medical"],
   promptCategories: Object.keys(prompts),
   logFile: "runs.jsonl",
   ...(config.run ?? {})
@@ -626,6 +628,9 @@ async function maybeUpload(page, target) {
 }
 
 function buildPrompt(target) {
+  const sensitivePrompt = maybeBuildSensitivePrompt(target);
+  if (sensitivePrompt) return sensitivePrompt;
+
   const categories = target.promptCategories?.length ? target.promptCategories : runConfig.promptCategories;
   const availableCategories = categories.filter((name) => prompts[name]?.length);
   const category = choice(availableCategories.length ? availableCategories : Object.keys(prompts));
@@ -639,6 +644,32 @@ function buildPrompt(target) {
 
   return {
     category,
+    text: `${prompt}\n\n${choice(suffixes)}`
+  };
+}
+
+function maybeBuildSensitivePrompt(target) {
+  const probability = target.sensitivePromptProbability ?? runConfig.sensitivePromptProbability ?? 0;
+  if (probability <= 0 || Math.random() > probability) return null;
+
+  const configuredCategories = target.sensitivePromptCategories?.length
+    ? target.sensitivePromptCategories
+    : runConfig.sensitivePromptCategories;
+  const availableCategories = configuredCategories.filter((name) => prompts[name]?.length);
+  if (availableCategories.length === 0) return null;
+
+  const category = choice(availableCategories);
+  const prompt = choice(prompts[category]);
+  const suffixes = [
+    "Treat this as synthetic lab data, not a real customer record.",
+    "Summarize what risk category this sample represents.",
+    "Reply with a short data-handling recommendation.",
+    "Identify the sensitive data types in this synthetic example."
+  ];
+
+  return {
+    category,
+    sensitive: true,
     text: `${prompt}\n\n${choice(suffixes)}`
   };
 }
@@ -674,6 +705,16 @@ function buildFollowUpPrompt(category, turn) {
       "Give me a few more options with a different tone.",
       "Make it shorter and more direct.",
       "Which option is strongest and why?"
+    ],
+    "dlp-pci": [
+      "Now explain why this should be blocked or redacted before using an AI app.",
+      "Turn that into a short employee warning about payment data.",
+      "List the safest next steps for handling this synthetic card-data sample."
+    ],
+    "dlp-medical": [
+      "Now explain why this should be treated as regulated health information.",
+      "Turn that into a short employee warning about medical data.",
+      "List the safest next steps for handling this synthetic medical sample."
     ]
   };
 

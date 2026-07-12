@@ -20,6 +20,8 @@
     "logFile": "runs.jsonl",
     "allowUploads": true,
     "uploadProbability": 0.12,
+    "sensitivePromptProbability": 0.06,
+    "sensitivePromptCategories": ["dlp-pci", "dlp-medical"],
     "multiTurnProbability": 0.4,
     "maxChatTurns": 3,
     "promptCategories": [

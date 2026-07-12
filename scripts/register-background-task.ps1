@@ -49,7 +49,10 @@ if ($NoFast) {
 }
 
 $action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument ($argumentParts -join " ")
-$trigger = New-ScheduledTaskTrigger -AtLogOn
+$triggers = @(
+  (New-ScheduledTaskTrigger -AtLogOn),
+  (New-ScheduledTaskTrigger -AtStartup)
+)
 $settings = New-ScheduledTaskSettingsSet `
   -AllowStartIfOnBatteries `
   -DontStopIfGoingOnBatteries `
@@ -60,14 +63,14 @@ $settings = New-ScheduledTaskSettingsSet `
   -StartWhenAvailable
 $principal = New-ScheduledTaskPrincipal -UserId "$env:USERDOMAIN\$env:USERNAME" -LogonType Interactive -RunLevel Highest
 
-Register-ScheduledTask -TaskName $TaskName -Action $action -Trigger $trigger -Settings $settings -Principal $principal -Description "Runs the GenAI traffic harness in repeat mode as the logged-in desktop user." -Force
+Register-ScheduledTask -TaskName $TaskName -Action $action -Trigger $triggers -Settings $settings -Principal $principal -Description "Runs the GenAI traffic harness in repeat mode as the logged-in desktop user." -Force
 
 if ($StartNow) {
   Start-ScheduledTask -TaskName $TaskName
 }
 
 Write-Host "Registered scheduled task '$TaskName'."
-Write-Host "It runs at logon as $env:USERDOMAIN\$env:USERNAME, waits $StartupDelaySeconds second(s), and then supervises repeated harness cycles."
+Write-Host "It runs at startup/logon as $env:USERDOMAIN\$env:USERNAME, waits $StartupDelaySeconds second(s), and then supervises repeated harness cycles."
 Write-Host "Logs are written to: $(Join-Path $ProjectPath "logs")"
 if (-not $StartNow) {
   Write-Host "Start it now with: Start-ScheduledTask -TaskName `"$TaskName`""

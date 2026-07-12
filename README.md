@@ -161,13 +161,13 @@ After editing the config:
 
 The task runs `scripts\run-once.ps1`, which calls `npm run run`.
 
-For a repeating background task that starts now and again at user logon:
+For a repeating background task that starts now and again at startup/logon:
 
 ```powershell
 npm run background:register
 ```
 
-That registers `GenAI Traffic Harness Background`, runs `scripts\run-repeating.ps1`, and writes logs under `logs\background-*.log`. By default it waits 3 minutes after logon, runs 40 randomized sessions, waits 20 minutes, then starts the next batch. The PowerShell wrapper supervises the runner forever, so if a batch exits or crashes it logs the exit and starts the next batch after a short retry delay.
+That registers `GenAI Traffic Harness Background`, runs `scripts\run-repeating.ps1`, and writes logs under `logs\background-*.log`. By default it waits 3 minutes after startup/logon, runs 40 randomized sessions, waits 20 minutes, then starts the next batch. The PowerShell wrapper supervises the runner forever, so if a batch exits or crashes it logs the exit and starts the next batch after a short retry delay.
 
 To check the task state and the latest background log:
 
@@ -187,7 +187,7 @@ To stop and remove it:
 npm run background:remove
 ```
 
-The background task is intentionally a Scheduled Task running as the interactive user, not a Windows Service. A true Windows Service runs in session 0 and is not reliable for logged-in Chrome profile automation. The task can run without a visible PowerShell window, but Chrome may still open in the desktop session because these sites are more reliable in headed Chrome than headless Chrome.
+The background task is intentionally a Scheduled Task running as the interactive user, not a Windows Service. A true Windows Service runs in session 0 and is not reliable for logged-in Chrome profile automation. The task has startup and logon triggers, can run without a visible PowerShell window, and Chrome may still open in the desktop session because these sites are more reliable in headed Chrome than headless Chrome.
 
 Important Windows behavior: this headed Chrome task starts after the Windows user logs on. If the EC2 instance boots at 6am but nobody has logged in yet, there is no interactive desktop session for visible Chrome automation to use. For unattended pre-login traffic, use the Amazon Linux/headless deployment or create a separate headless Windows task with a dedicated browser profile. The logged-in Chrome profile workflow is strongest after the desktop session exists.
 
@@ -217,11 +217,15 @@ Upload and conversation behavior can be tuned in `config\targets.local.json`:
 
 ```json
 "uploadProbability": 0.28,
+"sensitivePromptProbability": 0.06,
+"sensitivePromptCategories": ["dlp-pci", "dlp-medical"],
 "conversation": {
   "multiTurnProbability": 0.5,
   "maxTurns": 3
 }
 ```
+
+Sensitive prompt categories are synthetic lab data only. `dlp-pci` includes common public test card values and is shaped to satisfy rules such as "5 or more Credit Card Numbers". `dlp-medical` includes fake patient-chart fields such as DOB, MRN, diagnosis, medication, lab, and insurance/member identifiers. The default probability is low so most traffic stays normal.
 
 The scheduled task created by `scripts\register-scheduled-task.ps1` runs browser automation only. If you also want thick-client activity on a schedule, create a separate scheduled task for `scripts\run-desktop-clients.ps1`.
 
@@ -244,7 +248,7 @@ The example config includes placeholders and common SaaS categories. You should 
 
 ## DLP Fixtures
 
-`npm run fixtures` creates synthetic files in `fixtures/generated`. These are intentionally test data, not real secrets. Some strings resemble common DLP detectors, such as sample credit card numbers and clearly labeled fake identifiers.
+`npm run fixtures` creates synthetic files in `fixtures/generated`. These are intentionally test data, not real secrets. Some strings resemble common DLP detectors, such as sample credit card numbers, fake identifiers, and fake medical-record fields.
 
 If you generate approved test files from DLptest or another internal test-data source, place them in `fixtures/generated`; the harness will include them in the upload pool. Keep those files clearly labeled as synthetic/test content.
 
