@@ -218,6 +218,7 @@ Upload and conversation behavior can be tuned in `config\targets.local.json`:
 ```json
 "uploadProbability": 0.28,
 "sensitivePromptProbability": 0.06,
+"sensitiveUploadProbability": 0.5,
 "sensitivePromptCategories": ["dlp-pci", "dlp-medical"],
 "conversation": {
   "multiTurnProbability": 0.5,
@@ -225,7 +226,7 @@ Upload and conversation behavior can be tuned in `config\targets.local.json`:
 }
 ```
 
-Sensitive prompt categories are synthetic lab data only. `dlp-pci` includes common public test card values and is shaped to satisfy rules such as "5 or more Credit Card Numbers". `dlp-medical` includes fake patient-chart fields such as DOB, MRN, diagnosis, medication, lab, and insurance/member identifiers. The default probability is low so most traffic stays normal.
+Sensitive prompt categories are synthetic lab data only. `dlp-pci` includes common public test card values and is shaped to satisfy rules such as "5 or more Credit Card Numbers". `dlp-medical` includes fake patient-chart fields such as DOB, MRN, diagnosis, medication, lab, and insurance/member identifiers. The default prompt probability is low so most traffic stays normal. When a sensitive prompt is selected, `sensitiveUploadProbability` controls whether the runner also tries to attach a matching sensitive fixture before sending the prompt.
 
 The scheduled task created by `scripts\register-scheduled-task.ps1` runs browser automation only. If you also want thick-client activity on a schedule, create a separate scheduled task for `scripts\run-desktop-clients.ps1`.
 
@@ -248,7 +249,7 @@ The example config includes placeholders and common SaaS categories. You should 
 
 ## DLP Fixtures
 
-`npm run fixtures` creates synthetic files in `fixtures/generated`. These are intentionally test data, not real secrets. Some strings resemble common DLP detectors, such as sample credit card numbers, fake identifiers, and fake medical-record fields.
+`npm run fixtures` creates synthetic files in `fixtures/generated`. These are intentionally test data, not real secrets. Some strings resemble common DLP detectors, such as sample credit card numbers, fake identifiers, and fake medical-record fields. Sensitive fixtures include text, CSV, JSON, HTML/XML, RTF/Word-compatible `.doc`, and simple PDF samples.
 
 If you generate approved test files from DLptest or another internal test-data source, place them in `fixtures/generated`; the harness will include them in the upload pool. Keep those files clearly labeled as synthetic/test content.
 

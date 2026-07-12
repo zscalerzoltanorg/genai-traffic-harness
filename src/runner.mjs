@@ -50,6 +50,7 @@ const runConfig = {
   multiTurnProbability: 0.35,
   maxChatTurns: 3,
   sensitivePromptProbability: 0.06,
+  sensitiveUploadProbability: 0.5,
   sensitivePromptCategories: ["dlp-pci", "dlp-medical"],
   promptCategories: Object.keys(prompts),
   logFile: "runs.jsonl",
@@ -337,7 +338,7 @@ async function chat(page, target) {
 
   const turns = chooseChatTurnCount(target);
   const firstPrompt = buildPrompt(target);
-  const uploaded = await maybeUpload(page, target);
+  const uploaded = await maybeUpload(page, target, firstPrompt);
   const promptCategories = [firstPrompt.category];
 
   await sendChatPrompt(page, target, firstPrompt);
@@ -595,11 +596,13 @@ async function download(page, target) {
   return { downloaded: false };
 }
 
-async function maybeUpload(page, target) {
-  const uploadProbability = target.uploadProbability ?? runConfig.uploadProbability;
+async function maybeUpload(page, target, prompt = null) {
+  const uploadProbability = prompt?.sensitive
+    ? target.sensitiveUploadProbability ?? runConfig.sensitiveUploadProbability ?? 0
+    : target.uploadProbability ?? runConfig.uploadProbability;
   if (!runConfig.allowUploads || Math.random() > uploadProbability) return false;
 
-  const fixtures = await listFixtureFiles();
+  const fixtures = await listFixtureFiles(prompt?.sensitive ? { sensitiveCategory: prompt.category } : {});
   if (fixtures.length === 0) return false;
 
   const file = choice(fixtures);
@@ -607,7 +610,7 @@ async function maybeUpload(page, target) {
   if ((await fileInputs.count().catch(() => 0)) > 0) {
     await fileInputs.first().setInputFiles(file);
     await humanPause();
-    return true;
+    return { file: path.basename(file), sensitive: Boolean(prompt?.sensitive) };
   }
 
   const attachSelectors = target.selectors?.attach ?? [];
@@ -621,7 +624,7 @@ async function maybeUpload(page, target) {
     if (!chooser) continue;
     await chooser.setFiles(file);
     await humanPause();
-    return true;
+    return { file: path.basename(file), sensitive: Boolean(prompt?.sensitive) };
   }
 
   return false;
@@ -777,7 +780,7 @@ function defaultInputSelectors() {
   return ["textarea", "[contenteditable='true']", "[role='textbox']"];
 }
 
-async function listFixtureFiles() {
+async function listFixtureFiles(options = {}) {
   const dir = path.resolve("fixtures/generated");
   const entries = await readdir(dir).catch(() => []);
   const files = [];
@@ -786,6 +789,14 @@ async function listFixtureFiles() {
     const full = path.join(dir, entry);
     const info = await stat(full).catch(() => null);
     if (info?.isFile()) files.push(full);
+  }
+
+  if (options.sensitiveCategory) {
+    const pattern = options.sensitiveCategory === "dlp-medical"
+      ? /medical|patient|hipaa|health/i
+      : /pci|dlp|card|payment/i;
+    const sensitiveFiles = files.filter((file) => pattern.test(path.basename(file)));
+    if (sensitiveFiles.length > 0) return sensitiveFiles;
   }
 
   return files;
